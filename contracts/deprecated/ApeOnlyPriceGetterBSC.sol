@@ -4,7 +4,7 @@ pragma solidity =0.6.6;
 import "../token-lib/IERC20.sol";
 import "../swap-v2-lib/IApePair.sol";
 import "../swap-v2-lib/IApeFactory.sol";
-import "../IPriceGetter.sol";
+import "./IPriceGetterV1.sol";
 
 // This library provides simple price calculations for ApeSwap tokens, accounting
 // for commonly used pairings. Will break if USDT, USDC, or DAI goes far off peg.
@@ -12,7 +12,7 @@ import "../IPriceGetter.sol";
 // liquidation, as it is vulnerable to manipulation by flash loans, etc. BETA
 // SOFTWARE, PROVIDED AS IS WITH NO WARRANTIES WHATSOEVER.
 
-contract ApeOnlyPriceGetterBSC is IPriceGetter {
+contract ApeOnlyPriceGetterBSC is IPriceGetterV1 {
     address public constant override FACTORY = 0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6; // ApeFactory
     bytes32 public constant override INITCODEHASH =
         hex"f4ccce374816856d11f00e4069e7cada164065686fbef53c6167a63ec2fd8c5b";
