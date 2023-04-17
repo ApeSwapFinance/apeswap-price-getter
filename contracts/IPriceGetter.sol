@@ -3,21 +3,17 @@ pragma solidity 0.8.16;
 
 interface IPriceGetter {
     // FIXME: Remove/Update interface as needed
-    // function DECIMALS() external view returns (uint256);
-
     // function FACTORY() external view returns (address);
 
-    // function INITCODEHASH() external view returns (bytes32);
+    function getLPPrice(address token, address factory) external view returns (uint256);
 
-    function getLPPrice(address token, uint256 _decimals) external view returns (uint256);
+    function getLPPrices(address[] calldata tokens, address factory) external view returns (uint256[] memory prices);
 
-    function getLPPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices);
+    function getNativePrice(address factory) external view returns (uint256);
 
-    function getNativePrice() external view returns (uint256);
+    function getPrice(address token, address factory) external view returns (uint256);
 
-    function getPrice(address token, uint256 _decimals) external view returns (uint256);
-
-    function getPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices);
+    function getPrices(address[] calldata tokens, address factory) external view returns (uint256[] memory prices);
 
     // function getRawPrice(address token) external view returns (uint256);
 

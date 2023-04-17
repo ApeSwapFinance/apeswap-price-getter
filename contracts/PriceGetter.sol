@@ -9,7 +9,7 @@ import "./IPriceGetter.sol";
 
 // TODO: Disclaimer, this is for UI purposes only, cannot be used for smart contract logic
 
-contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
+contract PriceGetter is IPriceGetter, ChainlinkOracle {
     /*
     // NOTE: 
     Gas is actually an important consideration for this contract because it limits how many of these calls can be batched together in a single multicall read.
@@ -31,6 +31,15 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
         OracleType oracleType;
         address oracleAddress;
         uint8 oracleDecimals;
+    }
+
+    struct LocalVars {
+        uint256 tokenTotal;
+        uint256 usdStableTotal;
+        uint256 wNativeReserve;
+        uint256 wNativeTotal;
+        uint256 tokenReserve;
+        uint256 stableUsdReserve;
     }
 
     // TODO: Possibly use an enumerable set
@@ -59,7 +68,7 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
         require(_oracleTokens.length == _oracles.length, "Oracles length mismatch");
 
         // Loop through the oracleTokens array and set the oracle address for each oracle token using the _setTokenOracle() internal helper function
-        for (uint i = 0; i < _oracleTokens.length; i++) {
+        for (uint256 i = 0; i < _oracleTokens.length; i++) {
             /// @dev Assumes OracleType.CHAIN_LINK
             _setTokenOracle(_oracleTokens[i], _oracles[i], OracleType.CHAIN_LINK);
         }
@@ -83,7 +92,11 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
         }
     }
 
-    function _setTokenOracle(address token, address oracleAddress, OracleType oracleType) internal {
+    function _setTokenOracle(
+        address token,
+        address oracleAddress,
+        OracleType oracleType
+    ) internal {
         uint8 oracleDecimals = 18;
         try IERC20(oracleAddress).decimals() returns (uint8 dec) {
             oracleDecimals = dec;
@@ -96,28 +109,89 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
         });
     }
 
-    /** GETTERS? */
+    /** GETTERS */
 
-    // TODO: Implement
-    function getLPPrice(address token, uint256 _decimals) external view override returns (uint256) {}
+    function getLPPrice(address lp, address factory) public view override returns (uint256) {
+        //if not a LP, handle as a standard token
+        try IApePair(lp).getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
+            address token0 = IApePair(lp).token0();
+            address token1 = IApePair(lp).token1();
+            uint256 totalSupply = IApePair(lp).totalSupply();
 
-    // TODO: Implement
-    function getLPPrices(
-        address[] calldata tokens,
-        uint256 _decimals
-    ) external view override returns (uint256[] memory prices) {}
+            //price0*reserve0+price1*reserve1
 
-    // TODO: Implement
-    function getNativePrice() external view override returns (uint256) {}
+            uint256 totalValue = getPrice(token0, factory) * reserve0 + getPrice(token1, factory) * reserve1;
 
-    // TODO: Implement
-    function getPrice(address token, uint256 _decimals) external view override returns (uint256) {}
+            return totalValue / totalSupply;
+        } catch {
+            return getPrice(lp, factory);
+        }
+    }
 
-    // TODO Implement
-    function getPrices(
-        address[] calldata tokens,
-        uint256 _decimals
-    ) external view override returns (uint256[] memory prices) {}
+    function getLPPrices(address[] calldata tokens, address factory)
+        external
+        view
+        override
+        returns (uint256[] memory prices)
+    {
+        prices = new uint256[](tokens.length);
+        for (uint256 i; i < prices.length; i++) {
+            address token = tokens[i];
+            prices[i] = getLPPrice(token, factory);
+        }
+    }
+
+    function getNativePrice(address factory) external view override returns (uint256) {
+        return _getNativePrice(factory);
+    }
+
+    function getPrice(address token, address factory) public view override returns (uint256) {
+        LocalVars memory vars;
+
+        (vars.tokenReserve, vars.wNativeReserve) = _getNormalizedReservesFromFactory_Decimals(
+            factory,
+            token,
+            wNative,
+            _getTokenDecimals(token),
+            _getTokenDecimals(wNative)
+        );
+        vars.wNativeTotal = (vars.wNativeReserve * _getNativePrice(factory)) / 1e18;
+        vars.tokenTotal += vars.tokenReserve;
+
+        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
+            address stableUsdToken = stableUsdTokens[i];
+            (vars.tokenReserve, vars.stableUsdReserve) = _getNormalizedReservesFromFactory_Decimals(
+                factory,
+                token,
+                stableUsdToken,
+                _getTokenDecimals(token),
+                stableUsdTokenDecimals[stableUsdToken]
+            );
+            uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
+            if (stableUsdPrice > 0) {
+                /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
+                vars.usdStableTotal += (vars.stableUsdReserve * stableUsdPrice) / 1e18;
+            } else {
+                vars.usdStableTotal += vars.stableUsdReserve;
+            }
+            vars.tokenTotal += vars.tokenReserve;
+        }
+        return ((vars.usdStableTotal + vars.wNativeTotal) * 1e18) / vars.tokenTotal;
+    }
+
+    function getPrices(address[] calldata tokens, address factory)
+        external
+        view
+        override
+        returns (uint256[] memory prices)
+    {
+        prices = new uint256[](tokens.length);
+
+        for (uint256 i; i < prices.length; i++) {
+            address token = tokens[i];
+            prices[i] = getPrice(token, factory);
+        }
+    }
 
     function _getOraclePriceNormalized(address token) internal view returns (uint256) {
         OracleInfo memory oracleInfo = tokenOracles[token];
@@ -142,10 +216,10 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
             address stableUsdToken = stableUsdTokens[i];
             (uint256 wNativeReserve, uint256 stableUsdReserve) = _getNormalizedReservesFromFactory_Decimals(
                 factory,
-                stableUsdToken,
                 wNative,
-                stableUsdTokenDecimals[stableUsdToken],
-                18
+                stableUsdToken,
+                _getTokenDecimals(wNative),
+                stableUsdTokenDecimals[stableUsdToken]
             );
             uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
             if (stableUsdPrice > 0) {
@@ -190,7 +264,7 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
 
         // Calculate the price of tokenA in terms of tokenB by dividing the normalized reserve value of tokenA
         // from the normalized reserve value of tokenB.
-        priceAForB = (normalizedReserveA * (10 ** 18)) / normalizedReserveB;
+        priceAForB = (normalizedReserveA * (10**18)) / normalizedReserveB;
     }
 
     function _getNormalizedReservesFromFactory(
@@ -282,6 +356,6 @@ contract PriceGetter_UniV2 is IPriceGetter, ChainlinkOracle {
 
     /// @notice Normalize the amount passed to wei or 1e18 decimals
     function _normalize(uint256 amount, uint8 decimals) private pure returns (uint256) {
-        return (amount * (10 ** 18)) / (10 ** decimals);
+        return (amount * (10**18)) / (10**decimals);
     }
 }

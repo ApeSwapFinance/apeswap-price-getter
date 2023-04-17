@@ -219,6 +219,9 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 'auto',
       gasPrice: 'auto',
+      forking: {
+        url: 'https://bsc-dataseed4.binance.org',
+      },
     },
   },
   gasReporter: {
