@@ -2,20 +2,42 @@
 pragma solidity 0.8.16;
 
 interface IPriceGetter {
-    // FIXME: Remove/Update interface as needed
-    // function FACTORY() external view returns (address);
+    enum Protocol {
+        __,
+        Both,
+        V2,
+        V3
+    }
 
-    function getLPPrice(address token, address factory) external view returns (uint256);
+    function getLPPriceV2(address lp) external view returns (uint256);
 
-    function getLPPrices(address[] calldata tokens, address factory) external view returns (uint256[] memory prices);
+    function getLPPriceV3(
+        address token0,
+        address token1,
+        uint24 fee,
+        uint32 secondsAgo
+    ) external view returns (uint256);
 
-    function getNativePrice(address factory) external view returns (uint256);
+    function getLPPricesV2(address[] calldata tokens) external view returns (uint256[] memory prices);
 
-    function getPrice(address token, address factory) external view returns (uint256);
+    function getLPPricesV3(
+        address[] calldata tokens0,
+        address[] calldata tokens1,
+        uint24[] calldata fees,
+        uint24 secondsAgo
+    ) external view returns (uint256[] memory prices);
 
-    function getPrices(address[] calldata tokens, address factory) external view returns (uint256[] memory prices);
+    function getNativePrice(Protocol protocol, uint32 secondsAgo) external view returns (uint256);
 
-    // function getRawPrice(address token) external view returns (uint256);
+    function getPrice(
+        address token,
+        Protocol protocol,
+        uint32 secondsAgo
+    ) external view returns (uint256);
 
-    // function getRawPrices(address[] calldata tokens) external view returns (uint256[] memory prices);
+    function getPrices(
+        address[] calldata tokens,
+        Protocol protocol,
+        uint32 secondsAgo
+    ) external view returns (uint256[] memory prices);
 }

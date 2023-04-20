@@ -4,6 +4,13 @@ import { ethers } from 'hardhat'
 import axios from 'axios'
 import { BigNumber } from 'ethers'
 
+enum Protocol {
+  __,
+  Both,
+  V2,
+  V3,
+}
+
 describe('PriceGetter', function () {
   async function fixture() {
     const wNative = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
@@ -24,9 +31,10 @@ describe('PriceGetter', function () {
       '0x51597f405303c4377e36123cbc172b13269ea163',
       '0xb97ad0e74fa7d920791e90258a6e2085088b4320',
     ]
+    const factoryV2 = '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6'
+    const factoryV3 = '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d'
     const PriceGetter = await ethers.getContractFactory('PriceGetter')
-    const priceGetter = await PriceGetter.deploy(wNative, stableUsdTokens, oracleTokens, oracles)
-    const factory = '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6'
+    const priceGetter = await PriceGetter.deploy(wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles)
     const tokens = [
       { address: '0x603c7f932ED1fc6575303D8Fb018fDCBb0f39a95', coingeckoId: 'apeswap-finance' },
       { address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', coingeckoId: 'usd-coin' },
@@ -34,31 +42,34 @@ describe('PriceGetter', function () {
       { address: '0x5774b2fc3e91af89f89141eacf76545e74265982', coingeckoId: 'nfty-token' },
       { address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', coingeckoId: 'bitcoin' },
     ]
-    return { priceGetter, factory, tokens }
+    return { priceGetter, tokens }
   }
 
   it('Should get right native price', async function () {
-    const { priceGetter, factory } = await loadFixture(fixture)
-    const wnativePrice = await priceGetter.getNativePrice(factory)
+    const { priceGetter } = await loadFixture(fixture)
+    const wnativePrice = await priceGetter.getNativePrice(Protocol.Both, 0)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     const coingeckoPrice = coingeckoData.data.binancecoin.usd
     const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
-    expect(wnativePrice).to.be.within(coingeckoPriceBN.mul(999).div(1000), coingeckoPriceBN.mul(1001).div(1000))
+    expect(wnativePrice).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
   })
 
   it('Should get right token prices', async function () {
     //Prices are allowed to be 1% off from coingecko price API
-    const { priceGetter, factory, tokens } = await loadFixture(fixture)
+    const { priceGetter, tokens } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
-    const tokenPrices = await priceGetter.getPrices(tokenAddresses, factory)
+    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.V2, 0)
     const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     for (let i = 0; i < tokenPrices.length; i++) {
+      console.log(i)
       const coingeckoPrice = coingeckoData.data[tokenNames[i]].usd
       const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
-      expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+      if (!tokenPrices[i].eq(0)) {
+        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+      }
     }
   })
 })

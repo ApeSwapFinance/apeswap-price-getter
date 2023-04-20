@@ -1,23 +1,16 @@
 import { ethers } from 'hardhat'
+import hre from 'hardhat'
+import getNetworkConfig from '../deploy-config'
 
-/**
- * // NOTE: This is an example of the default hardhat deployment approach.
- * This project takes deployments one step further by assigning each deployment
- * its own task in ../tasks/ organized by date.
- */
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000)
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS
+  const { wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles } = getNetworkConfig(hre.network.name)
 
-  const lockedAmount = ethers.utils.parseEther('1')
+  const PriceGetter = await ethers.getContractFactory('PriceGetter')
+  const priceGetter = await PriceGetter.deploy(wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles)
 
-  const Lock = await ethers.getContractFactory('Lock')
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount })
+  await priceGetter.deployed()
 
-  await lock.deployed()
-
-  console.log('Lock with 1 ETH deployed to:', lock.address)
+  console.log('PriceGetter deployed to:', priceGetter.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
