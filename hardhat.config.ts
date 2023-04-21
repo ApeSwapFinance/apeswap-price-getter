@@ -220,7 +220,7 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasPrice: 'auto',
       forking: {
-        url: 'https://bsc-dataseed4.binance.org',
+        url: 'https://rpc.ankr.com/bsc',
       },
     },
   },

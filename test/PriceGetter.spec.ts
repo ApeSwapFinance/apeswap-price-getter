@@ -59,7 +59,7 @@ describe('PriceGetter', function () {
     //Prices are allowed to be 1% off from coingecko price API
     const { priceGetter, tokens } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
-    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.V2, 0)
+    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.Both, 0)
     const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)

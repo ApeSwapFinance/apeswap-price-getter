@@ -362,7 +362,7 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle {
                 price = getLPPriceV3(wNative, stableUsdToken, fee, secondsAgo);
                 uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
                 if (stableUsdPrice > 0) {
-                    price *= stableUsdPrice / 1e18;
+                    price = (price * stableUsdPrice) / 1e18;
                 }
                 if (price > 0) {
                     address pair = factoryV3.getPool(wNative, stableUsdToken, fee);
@@ -501,7 +501,7 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle {
                 if (tempPrice > 0) {
                     uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
                     if (stableUsdPrice > 0) {
-                        tempPrice *= stableUsdPrice / 1e18;
+                        tempPrice = (tempPrice * stableUsdPrice) / 1e18;
                     }
 
                     address pair = factoryV3.getPool(token, stableUsdToken, fee);
