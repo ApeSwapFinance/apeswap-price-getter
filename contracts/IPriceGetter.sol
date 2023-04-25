@@ -9,35 +9,25 @@ interface IPriceGetter {
         V3
     }
 
-    function getLPPriceV2(address lp) external view returns (uint256);
-
-    function getLPPriceV3(
-        address token0,
-        address token1,
-        uint24 fee,
-        uint32 secondsAgo
-    ) external view returns (uint256);
+    function getLPPriceV2(address lp) external view returns (uint256 price);
 
     function getLPPricesV2(address[] calldata tokens) external view returns (uint256[] memory prices);
+
+    function getPriceV2(address token) external view returns (uint256 price);
+
+    function getLPPriceV3(address token0, address token1, uint24 fee) external view returns (uint256 price);
 
     function getLPPricesV3(
         address[] calldata tokens0,
         address[] calldata tokens1,
-        uint24[] calldata fees,
-        uint24 secondsAgo
+        uint24[] calldata fees
     ) external view returns (uint256[] memory prices);
 
-    function getNativePrice(Protocol protocol, uint32 secondsAgo) external view returns (uint256);
+    function getPriceV3(address token) external view returns (uint256 price);
 
-    function getPrice(
-        address token,
-        Protocol protocol,
-        uint32 secondsAgo
-    ) external view returns (uint256);
+    function getNativePrice(Protocol protocol) external view returns (uint256 price);
 
-    function getPrices(
-        address[] calldata tokens,
-        Protocol protocol,
-        uint32 secondsAgo
-    ) external view returns (uint256[] memory prices);
+    function getPrice(address token, Protocol protocol) external view returns (uint256 price);
+
+    function getPrices(address[] calldata tokens, Protocol protocol) external view returns (uint256[] memory prices);
 }
