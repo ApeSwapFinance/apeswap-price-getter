@@ -35,5 +35,43 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         address[] memory _oracles
     ) PriceGetterV2(_wNative, _defaultFactoryV2, _defaultFactoryV3, _stableUsdTokens, _oracleTokens, _oracles) {}
 
-    // TODO: Implement IPriceGetterV1
+    function DECIMALS() external pure returns (uint256) {
+        return 18;
+    }
+
+    function FACTORY() external pure returns (address) {
+        return address(0);
+    }
+
+    function INITCODEHASH() external pure returns (bytes32) {
+        return "";
+    }
+
+    function getLPPrice(address token, uint256 _decimals) external view returns (uint256) {
+        return getLPPriceV2(token);
+    }
+
+    function getLPPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices) {
+        return getLPPricesV2(tokens);
+    }
+
+    function getNativePrice() external view returns (uint256) {
+        return getNativePrice(Protocol.Both);
+    }
+
+    function getPrice(address token, uint256 _decimals) external view returns (uint256) {
+        return getPrice(token, Protocol.Both);
+    }
+
+    function getPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices) {
+        return getPrices(tokens, Protocol.Both);
+    }
+
+    function getRawPrice(address token) external view returns (uint256) {
+        return getPrice(token, Protocol.Both);
+    }
+
+    function getRawPrices(address[] calldata tokens) external view returns (uint256[] memory prices) {
+        return getPrices(tokens, Protocol.Both);
+    }
 }

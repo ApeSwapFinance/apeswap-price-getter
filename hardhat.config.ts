@@ -220,7 +220,7 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasPrice: 'auto',
       forking: {
-        url: 'https://rpc.ankr.com/bsc',
+        url: process.env.FORK_RPC + '',
       },
     },
   },

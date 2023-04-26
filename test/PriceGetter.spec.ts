@@ -33,7 +33,11 @@ describe('PriceGetter', function () {
     ]
     const factoryV2 = '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6'
     const factoryV3 = '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d'
-    const PriceGetter = await ethers.getContractFactory('PriceGetter')
+
+    const pcsFactoryV2 = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73'
+    const pcsFactoryV3 = '0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'
+
+    const PriceGetter = await ethers.getContractFactory('PriceGetterV2')
     const priceGetter = await PriceGetter.deploy(wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles)
     const tokens = [
       { address: '0x603c7f932ED1fc6575303D8Fb018fDCBb0f39a95', coingeckoId: 'apeswap-finance' },
@@ -42,12 +46,22 @@ describe('PriceGetter', function () {
       { address: '0x5774b2fc3e91af89f89141eacf76545e74265982', coingeckoId: 'nfty-token' },
       { address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', coingeckoId: 'bitcoin' },
     ]
-    return { priceGetter, tokens }
+    return { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 }
   }
 
   it('Should get right native price', async function () {
     const { priceGetter } = await loadFixture(fixture)
-    const wnativePrice = await priceGetter.getNativePrice(Protocol.Both, 0)
+    const wnativePrice = await priceGetter.getNativePrice(Protocol.Both)
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd&precision=18`
+    const coingeckoData: any = await axios.get(url)
+    const coingeckoPrice = coingeckoData.data.binancecoin.usd
+    const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
+    expect(wnativePrice).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+  })
+
+  it('Should get right native price from custom factory', async function () {
+    const { priceGetter, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
+    const wnativePrice = await priceGetter.getNativePriceFromFactory(Protocol.Both, pcsFactoryV2, pcsFactoryV3)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     const coingeckoPrice = coingeckoData.data.binancecoin.usd
@@ -59,7 +73,30 @@ describe('PriceGetter', function () {
     //Prices are allowed to be 1% off from coingecko price API
     const { priceGetter, tokens } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
-    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.Both, 0)
+    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.Both)
+    const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
+    const coingeckoData: any = await axios.get(url)
+    for (let i = 0; i < tokenPrices.length; i++) {
+      console.log(i)
+      const coingeckoPrice = coingeckoData.data[tokenNames[i]].usd
+      const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
+      if (!tokenPrices[i].eq(0)) {
+        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+      }
+    }
+  })
+
+  it('Should get right token prices with custom factory', async function () {
+    //Prices are allowed to be 1% off from coingecko price API
+    const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
+    const tokenAddresses = Array.from(tokens, (x) => x.address)
+    const tokenPrices = await priceGetter.getPricesFromFactory(
+      tokenAddresses,
+      Protocol.Both,
+      pcsFactoryV2,
+      pcsFactoryV3
+    )
     const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
