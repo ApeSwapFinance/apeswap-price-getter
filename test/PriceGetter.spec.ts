@@ -49,6 +49,16 @@ describe('PriceGetter', function () {
     return { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 }
   }
 
+  it('Should remove and add oracle', async function () {
+    const { priceGetter } = await loadFixture(fixture)
+    await priceGetter.removeTokenOracle('0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56')
+    await priceGetter.setTokenOracle(
+      '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+      '0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee',
+      1
+    )
+  })
+
   it('Should get right native price', async function () {
     const { priceGetter } = await loadFixture(fixture)
     const wnativePrice = await priceGetter.getNativePrice(Protocol.Both)

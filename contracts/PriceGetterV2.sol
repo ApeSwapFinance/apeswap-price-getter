@@ -13,6 +13,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 import "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol";
 import "@uniswap/v3-core/contracts/libraries/FullMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "hardhat/console.sol";
 
@@ -25,7 +26,7 @@ The user assumes all responsibility and risk for proper usage.
 The developer and associated parties make no warranties and are not liable for any damages incurred.
 */
 
-contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle {
+contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
     enum OracleType {
         NONE,
         CHAIN_LINK
@@ -73,7 +74,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle {
         address[] memory _stableUsdTokens,
         address[] memory _oracleTokens,
         address[] memory _oracles
-    ) {
+    ) Ownable() {
         // Check if the lengths of the oracleTokens and oracles arrays match
         require(_oracleTokens.length == _oracles.length, "Oracles length mismatch");
 
@@ -107,6 +108,28 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle {
             require(stableUsdTokenDecimals[stableUsdToken] == 0, "PriceGetter: Stable token already added");
             stableUsdTokenDecimals[stableUsdToken] = _getTokenDecimals(stableUsdToken);
         }
+    }
+
+    /**
+     * @dev Sets the oracle address and type for a specified token.
+     * @param token The address of the token to set the oracle for.
+     * @param oracleAddress The address of the oracle contract.
+     * @param oracleType The type of the oracle (e.g. Chainlink, Uniswap).
+     */
+    function setTokenOracle(
+        address token,
+        address oracleAddress,
+        OracleType oracleType
+    ) public onlyOwner {
+        _setTokenOracle(token, oracleAddress, oracleType);
+    }
+
+    /**
+     * @dev Removes the oracle address for a specified token.
+     * @param token The address of the token to set the oracle for.
+     */
+    function removeTokenOracle(address token) public onlyOwner {
+        delete tokenOracles[token];
     }
 
     /**
