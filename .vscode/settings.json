@@ -7,9 +7,14 @@
     },
     "editor.formatOnSave": true,
     "cSpell.words": [
+        "Agos",
         "ARBISCAN",
+        "binancecoin",
         "chainlink",
+        "Cumulatives",
         "dont",
+        "ETHV",
+        "INITCODEHASH",
         "IWNATIVE",
         "mixedcase",
         "nomicfoundation",
@@ -19,6 +24,7 @@
         "precommit",
         "telos",
         "TELOSSCAN",
-        "WBNB"
+        "WBNB",
+        "wnative"
     ]
 }
