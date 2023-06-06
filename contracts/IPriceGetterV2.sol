@@ -18,16 +18,12 @@ interface IPriceGetterV2 {
 
     function getLPPriceV2FromFactory(IApeFactory factoryV2, address lp) external view returns (uint256 price);
 
-    function getLPPricesV2FromFactory(IApeFactory factoryV2, address[] calldata tokens)
-        external
-        view
-        returns (uint256[] memory prices);
+    function getLPPricesV2FromFactory(
+        IApeFactory factoryV2,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory prices);
 
-    function getLPPriceV3(
-        address token0,
-        address token1,
-        uint24 fee
-    ) external view returns (uint256 price);
+    function getLPPriceV3(address token0, address token1, uint24 fee) external view returns (uint256 price);
 
     function getLPPricesV3(
         address[] calldata tokens0,

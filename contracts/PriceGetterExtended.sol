@@ -47,15 +47,27 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return "";
     }
 
+    /**
+     * @dev Returns the price of a specified liquidity pool token.
+     * @param token The address of the liquidity pool token.
+     * @param _decimals UNUSED, kept for backwards compatibility.
+     * @return The price of the liquidity pool token.
+     */
     function getLPPrice(address token, uint256 _decimals) external view returns (uint256) {
         return getLPPriceV2(token);
     }
 
+    /**
+     * @dev Returns the prices of specified liquidity pool tokens.
+     * @param tokens Array of liquidity pool token addresses.
+     * @param _decimals UNUSED, kept for backwards compatibility.
+     * @return prices Array of liquidity pool token prices.
+     */
     function getLPPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices) {
         return getLPPricesV2(tokens);
     }
 
-    function getNativePrice() external view returns (uint256) {
+    function getNativePrice() external view override returns (uint256) {
         return getNativePrice(Protocol.Both);
     }
 
@@ -87,6 +99,9 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return getPrice(token, Protocol.V2);
     }
 
+    /**
+     * @dev {see getPrices} Left for backwards compatibility.
+     */
     function getRawPrices(address[] calldata tokens) external view returns (uint256[] memory prices) {
         return getPrices(tokens, Protocol.V2);
     }
