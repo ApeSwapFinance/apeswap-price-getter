@@ -100,11 +100,18 @@ task(TASK_TEST, '🫶 Test Task')
 export const mainnetMnemonic = getEnv('MAINNET_MNEMONIC')
 export const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
 
-interface NetworkUserConfigExtended extends HttpNetworkUserConfig {
+type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
 }
 
-const networkConfig: Record<Network, NetworkUserConfigExtended> = {
+type NetworkUserConfigExtended = HttpNetworkUserConfig & ExtendedNetworkOptions
+
+// Custom type for the hardhat network
+type ExtendedHardhatNetworkConfig = {
+  [K in Network]: K extends 'hardhat' ? HardhatUserConfig & ExtendedNetworkOptions : NetworkUserConfigExtended
+}
+
+const networkConfig: ExtendedHardhatNetworkConfig = {
   mainnet: {
     url: getEnv('MAINNET_RPC_URL') || '',
     getExplorerUrl: (address: string) => `https://etherscan.io/address/${address}`,
@@ -220,7 +227,7 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasPrice: 'auto',
       forking: {
-        url: process.env.FORK_RPC + '',
+        url: process.env.FORK_RPC || 'https://bsc.blockpi.network/v1/rpc/public',
       },
     },
   },
