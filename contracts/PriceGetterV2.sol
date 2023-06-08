@@ -206,8 +206,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         IApeFactory factoryV2,
         address[] calldata tokens
     ) public view returns (uint256[] memory prices) {
-        prices = new uint256[](tokens.length);
-        for (uint256 i; i < prices.length; i++) {
+        uint256 tokensLength = tokens.length;
+        prices = new uint256[](tokensLength);
+        for (uint256 i; i < tokensLength; i++) {
             address token = tokens[i];
             prices[i] = getLPPriceV2FromFactory(factoryV2, token);
         }
@@ -341,8 +342,13 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         address[] calldata tokens1,
         uint24[] calldata fees
     ) public view override returns (uint256[] memory prices) {
-        prices = new uint256[](tokens0.length);
-        for (uint256 i; i < prices.length; i++) {
+        require(
+            tokens0.length == tokens1.length && tokens0.length == fees.length,
+            "getLPPricesV3FromFactory: LENGTH_MISMATCH"
+        );
+        uint256 tokensLength = tokens0.length;
+        prices = new uint256[](tokensLength);
+        for (uint256 i; i < tokensLength; i++) {
             address token0 = tokens0[i];
             address token1 = tokens1[i];
             uint24 fee = fees[i];
@@ -522,9 +528,10 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3
     ) public view override returns (uint256[] memory prices) {
-        prices = new uint256[](tokens.length);
+        uint256 tokenLength = tokens.length;
+        prices = new uint256[](tokenLength);
 
-        for (uint256 i; i < prices.length; i++) {
+        for (uint256 i; i < tokenLength; i++) {
             address token = tokens[i];
             prices[i] = getPriceFromFactory(token, protocol, factoryV2, factoryV3);
         }
