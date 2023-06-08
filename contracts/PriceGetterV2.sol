@@ -293,6 +293,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
             sqrtPriceX96 = sqrtPriceX96 / 1e3;
             decimalCorrection = 6;
         }
+        if (sqrtPriceX96 >= 340282366920938463463374607431768211455) {
+            return 0;
+        }
 
         if (token1 < token0) {
             price =
