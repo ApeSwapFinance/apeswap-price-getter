@@ -4,6 +4,7 @@ import { ethers } from 'hardhat'
 import axios from 'axios'
 import { BigNumber } from 'ethers'
 import { deployPriceGetterBSCFixture } from './fixtures/deployPriceGetter'
+import { estimateReadOperationGas } from './utils/gasHelper'
 
 enum Protocol {
   __,
@@ -30,7 +31,12 @@ describe('PriceGetter', function () {
 
   it('Should get right native price', async function () {
     const { priceGetter } = await loadFixture(fixture)
-    const wnativePrice = await priceGetter.getNativePrice(Protocol.Both)
+
+    const functionName = 'getNativePrice'
+    const wnativePrice = await priceGetter[functionName](Protocol.Both)
+    const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [Protocol.Both])
+    console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
+
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     const coingeckoPrice = coingeckoData.data.binancecoin.usd
@@ -40,7 +46,16 @@ describe('PriceGetter', function () {
 
   it('Should get right native price from custom factory', async function () {
     const { priceGetter, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
-    const wnativePrice = await priceGetter.getNativePriceFromFactory(Protocol.Both, pcsFactoryV2, pcsFactoryV3)
+
+    const functionName = 'getNativePriceFromFactory'
+    const wnativePrice = await priceGetter[functionName](Protocol.Both, pcsFactoryV2, pcsFactoryV3)
+    const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [
+      Protocol.Both,
+      pcsFactoryV2,
+      pcsFactoryV3,
+    ])
+    console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
+
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     const coingeckoPrice = coingeckoData.data.binancecoin.usd
@@ -52,7 +67,12 @@ describe('PriceGetter', function () {
     //Prices are allowed to be 2% off from coingecko price API
     const { priceGetter, tokens } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
-    const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.Both)
+
+    const functionName = 'getPrices'
+    const tokenPrices = await priceGetter[functionName](tokenAddresses, Protocol.Both)
+    const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [tokenAddresses, Protocol.Both])
+    console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
+
     const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
@@ -69,12 +89,17 @@ describe('PriceGetter', function () {
     //Prices are allowed to be 2% off from coingecko price API
     const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
-    const tokenPrices = await priceGetter.getPricesFromFactory(
+
+    const functionName = 'getPricesFromFactory'
+    const tokenPrices = await priceGetter[functionName](tokenAddresses, Protocol.Both, pcsFactoryV2, pcsFactoryV3)
+    const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [
       tokenAddresses,
       Protocol.Both,
       pcsFactoryV2,
-      pcsFactoryV3
-    )
+      pcsFactoryV3,
+    ])
+    console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
+
     const tokenNames = Array.from(tokens, (x) => x.coingeckoId)
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
