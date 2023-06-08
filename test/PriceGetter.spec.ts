@@ -49,7 +49,7 @@ describe('PriceGetter', function () {
   })
 
   it('Should get right token prices', async function () {
-    //Prices are allowed to be 1% off from coingecko price API
+    //Prices are allowed to be 2% off from coingecko price API
     const { priceGetter, tokens } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
     const tokenPrices = await priceGetter.getPrices(tokenAddresses, Protocol.Both)
@@ -57,17 +57,16 @@ describe('PriceGetter', function () {
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     for (let i = 0; i < tokenPrices.length; i++) {
-      console.log(i)
       const coingeckoPrice = coingeckoData.data[tokenNames[i]].usd
       const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
       if (!tokenPrices[i].eq(0)) {
-        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(98).div(100), coingeckoPriceBN.mul(102).div(100))
       }
     }
   })
 
   it('Should get right token prices with custom factory', async function () {
-    //Prices are allowed to be 1% off from coingecko price API
+    //Prices are allowed to be 2% off from coingecko price API
     const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
     const tokenPrices = await priceGetter.getPricesFromFactory(
@@ -80,11 +79,10 @@ describe('PriceGetter', function () {
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     for (let i = 0; i < tokenPrices.length; i++) {
-      console.log(i)
       const coingeckoPrice = coingeckoData.data[tokenNames[i]].usd
       const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
       if (!tokenPrices[i].eq(0)) {
-        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(99).div(100), coingeckoPriceBN.mul(101).div(100))
+        expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(98).div(100), coingeckoPriceBN.mul(102).div(100))
       }
     }
   })

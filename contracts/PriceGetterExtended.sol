@@ -71,6 +71,14 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return getNativePrice(Protocol.Both);
     }
 
+    function getETHPrice(uint32 secondsAgo) external view returns (uint256) {
+        return getNativePrice(Protocol.Both);
+    }
+
+    function getETHPrice() external view returns (uint256) {
+        return getNativePrice(Protocol.Both);
+    }
+
     /**
      * @dev Returns the price of the specified token.
      * @param token The address of the token.
@@ -81,30 +89,26 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return getPrice(token, Protocol.Both);
     }
 
-    /**
-     * @dev Returns the prices of specified tokens.
-     * @param tokens Array of token addresses.
-     * @param _decimals UNUSED, kept for backwards compatibility.
-     * @return prices Array of token prices.
-     */
-    function getPrices(
-        address[] calldata tokens,
-        uint256 _decimals
-    ) external view override returns (uint256[] memory prices) {
+    function getPrice(address token, uint32 secondsAgo) external view returns (uint256) {
+        return getPrice(token, Protocol.Both);
+    }
+
+    function getPrices(address[] calldata tokens, uint256 _decimals) external view returns (uint256[] memory prices) {
         return getPrices(tokens, Protocol.Both);
     }
 
-    /**
-     * @dev {see getPrice} Left for backwards compatibility.
-     */
+    function getPrices(address[] calldata tokens, uint32 secondsAgo) external view returns (uint256[] memory prices) {
+        return getPrices(tokens, Protocol.Both);
+    }
+
     function getRawPrice(address token) external view returns (uint256) {
-        return getPrice(token, Protocol.Both);
+        return getPrice(token, Protocol.V2);
     }
 
     /**
      * @dev {see getPrices} Left for backwards compatibility.
      */
     function getRawPrices(address[] calldata tokens) external view returns (uint256[] memory prices) {
-        return getPrices(tokens, Protocol.Both);
+        return getPrices(tokens, Protocol.V2);
     }
 }
