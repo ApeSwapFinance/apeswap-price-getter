@@ -59,7 +59,19 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return getNativePrice(Protocol.Both);
     }
 
+    function getETHPrice(uint32 secondsAgo) external view returns (uint256) {
+        return getNativePrice(Protocol.Both);
+    }
+
+    function getETHPrice() external view returns (uint256) {
+        return getNativePrice(Protocol.Both);
+    }
+
     function getPrice(address token, uint256 _decimals) external view returns (uint256) {
+        return getPrice(token, Protocol.Both);
+    }
+
+    function getPrice(address token, uint32 secondsAgo) external view returns (uint256) {
         return getPrice(token, Protocol.Both);
     }
 
@@ -67,11 +79,15 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         return getPrices(tokens, Protocol.Both);
     }
 
+    function getPrices(address[] calldata tokens, uint32 secondsAgo) external view returns (uint256[] memory prices) {
+        return getPrices(tokens, Protocol.Both);
+    }
+
     function getRawPrice(address token) external view returns (uint256) {
-        return getPrice(token, Protocol.Both);
+        return getPrice(token, Protocol.V2);
     }
 
     function getRawPrices(address[] calldata tokens) external view returns (uint256[] memory prices) {
-        return getPrices(tokens, Protocol.Both);
+        return getPrices(tokens, Protocol.V2);
     }
 }

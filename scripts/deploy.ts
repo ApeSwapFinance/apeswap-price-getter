@@ -5,7 +5,7 @@ import getNetworkConfig from '../deploy-config'
 async function main() {
   const { wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles } = getNetworkConfig(hre.network.name)
 
-  const PriceGetter = await ethers.getContractFactory('PriceGetter')
+  const PriceGetter = await ethers.getContractFactory('PriceGetterExtended  ')
   const priceGetter = await PriceGetter.deploy(wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles)
 
   await priceGetter.deployed()

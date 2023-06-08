@@ -111,7 +111,6 @@ describe('PriceGetter', function () {
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tokenNames.toString()}&vs_currencies=usd&precision=18`
     const coingeckoData: any = await axios.get(url)
     for (let i = 0; i < tokenPrices.length; i++) {
-      console.log(i)
       const coingeckoPrice = coingeckoData.data[tokenNames[i]].usd
       const coingeckoPriceBN = BigNumber.from(Math.floor(coingeckoPrice * 1e9)).mul(1e9)
       if (!tokenPrices[i].eq(0)) {
