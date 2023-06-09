@@ -129,7 +129,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     },
   },
   arbitrum: {
-    url: getEnv('ARBITRUM_RPC_URL') || 'https://endpoints.omniatech.io/v1/arbitrum/one/public',
+    url: getEnv('ARBITRUM_RPC_URL') || 'https://arbitrum-one.publicnode.com',
     getExplorerUrl: (address: string) => `https://arbiscan.io/address/${address}`,
     chainId: 42161,
     accounts: {
@@ -269,7 +269,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       // mainnet: getEnv('ETHERSCAN_API_KEY'),
       // optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
-      // arbitrumOne: getEnv('ARBISCAN_API_KEY'),
+      arbitrumOne: getEnv('ARBISCAN_API_KEY'),
       bsc: getEnv('BSCSCAN_API_KEY'),
       // bscTestnet: getEnv('BSCSCAN_API_KEY'),
       polygon: getEnv('POLYGONSCAN_API_KEY'),

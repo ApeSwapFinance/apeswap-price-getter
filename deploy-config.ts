@@ -67,13 +67,27 @@ function getNetworkConfig(network: any) {
   } else if (['arbitrum'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {
-      wNative: '',
-      factoryV2: '',
-      factoryV3: '',
-      stableUsdTokens: [],
-      oracleTokens: [],
+      wNative: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+      factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284',
+      factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
+      stableUsdTokens: [
+        '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
+        '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
+        '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', // USDT
+      ],
+      oracleTokens: [
+        '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+        '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
+        '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
+        '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', // USDT
+      ],
       // https://docs.chain.link/data-feeds/price-feeds/addresses?network=arbitrum
-      oracles: [],
+      oracles: [
+        '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD
+        '0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB', // DAI/USD
+        '0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3', // USDC/USD
+        '0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7', // USDT/USD
+      ],
     }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
