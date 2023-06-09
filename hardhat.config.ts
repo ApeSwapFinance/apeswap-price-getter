@@ -100,11 +100,18 @@ task(TASK_TEST, '🫶 Test Task')
 export const mainnetMnemonic = getEnv('MAINNET_MNEMONIC')
 export const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
 
-interface NetworkUserConfigExtended extends HttpNetworkUserConfig {
+type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
 }
 
-const networkConfig: Record<Network, NetworkUserConfigExtended> = {
+type NetworkUserConfigExtended = HttpNetworkUserConfig & ExtendedNetworkOptions
+
+// Custom type for the hardhat network
+type ExtendedHardhatNetworkConfig = {
+  [K in Network]: K extends 'hardhat' ? HardhatUserConfig & ExtendedNetworkOptions : NetworkUserConfigExtended
+}
+
+const networkConfig: ExtendedHardhatNetworkConfig = {
   mainnet: {
     url: getEnv('MAINNET_RPC_URL') || '',
     getExplorerUrl: (address: string) => `https://etherscan.io/address/${address}`,
@@ -220,7 +227,7 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasPrice: 'auto',
       forking: {
-        url: process.env.FORK_RPC + '',
+        url: process.env.FORK_RPC || 'https://bsc.blockpi.network/v1/rpc/public',
       },
     },
   },
@@ -254,21 +261,21 @@ const config: HardhatUserConfig = {
     // except: [':ERC20$'], // Array of String matchers used to exclude contracts
     // outputFile: './contract-size.md', // Optional output file to write to
   },
-  // etherscan: {
-  /**
-   * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
-   *  This version breaks the src/task.ts file which hasn't been refactored yet
-   */
-  // apiKey: {
-  //   mainnet: getEnv('ETHERSCAN_API_KEY'),
-  //   optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
-  //   arbitrumOne: getEnv('ARBISCAN_API_KEY'),
-  //   bsc: getEnv('BSCSCAN_API_KEY'),
-  //   bscTestnet: getEnv('BSCSCAN_API_KEY'),
-  //   polygon: getEnv('POLYGONSCAN_API_KEY'),
-  //   polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
-  // },
-  // },
+  etherscan: {
+    /**
+     * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
+     *  This version breaks the src/task.ts file which hasn't been refactored yet
+     */
+    apiKey: {
+      // mainnet: getEnv('ETHERSCAN_API_KEY'),
+      // optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
+      // arbitrumOne: getEnv('ARBISCAN_API_KEY'),
+      bsc: getEnv('BSCSCAN_API_KEY'),
+      // bscTestnet: getEnv('BSCSCAN_API_KEY'),
+      // polygon: getEnv('POLYGONSCAN_API_KEY'),
+      // polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
+    },
+  },
 }
 
 const parseApiKey = (network: Network, key?: string): string | undefined => {
@@ -276,6 +283,7 @@ const parseApiKey = (network: Network, key?: string): string | undefined => {
 }
 
 /**
+ * // TODO: This has been deprecated
  * Placeholder configuration for @nomiclabs/hardhat-etherscan to store verification API urls
  */
 const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
