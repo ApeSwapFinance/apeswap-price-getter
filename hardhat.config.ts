@@ -129,7 +129,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     },
   },
   arbitrum: {
-    url: getEnv('ARBITRUM_RPC_URL') || '',
+    url: getEnv('ARBITRUM_RPC_URL') || 'https://endpoints.omniatech.io/v1/arbitrum/one/public',
     getExplorerUrl: (address: string) => `https://arbiscan.io/address/${address}`,
     chainId: 42161,
     accounts: {
@@ -161,7 +161,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     },
   },
   polygon: {
-    url: getEnv('POLYGON_RPC_URL') || 'https://matic-mainnet.chainstacklabs.com',
+    url: getEnv('POLYGON_RPC_URL') || 'https://polygon.llamarpc.com	',
     getExplorerUrl: (address: string) => `https://polygonscan.com/address/${address}`,
     chainId: 137,
     accounts: {
@@ -272,7 +272,7 @@ const config: HardhatUserConfig = {
       // arbitrumOne: getEnv('ARBISCAN_API_KEY'),
       bsc: getEnv('BSCSCAN_API_KEY'),
       // bscTestnet: getEnv('BSCSCAN_API_KEY'),
-      // polygon: getEnv('POLYGONSCAN_API_KEY'),
+      polygon: getEnv('POLYGONSCAN_API_KEY'),
       // polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
     },
   },
