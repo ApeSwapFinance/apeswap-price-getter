@@ -267,7 +267,7 @@ const config: HardhatUserConfig = {
      *  This version breaks the src/task.ts file which hasn't been refactored yet
      */
     apiKey: {
-      // mainnet: getEnv('ETHERSCAN_API_KEY'),
+      mainnet: getEnv('ETHERSCAN_API_KEY'),
       // optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
       arbitrumOne: getEnv('ARBISCAN_API_KEY'),
       bsc: getEnv('BSCSCAN_API_KEY'),
