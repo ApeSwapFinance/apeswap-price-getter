@@ -14,7 +14,7 @@
     "precompile": "yarn clean ./artifacts",
     "compile": "hardhat compile",
     "gen:docs": "hardhat docgen",
-    "deploy": "hardhat deploy",
+    "deploy": "hardhat run ./scripts/deploy/deployPriceGetterExtended.ts --network",
     "verify": "hardhat verify-contract",
     "test": "hardhat test",
     "test:gas": "env REPORT_GAS=true yarn test",

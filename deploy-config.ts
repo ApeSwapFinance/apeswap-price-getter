@@ -53,16 +53,30 @@ function getNetworkConfig(network: any) {
         '0x0A6513e40db6EB1b165753AD52E80663aeA50545', // USDT/USD
       ],
     }
-  } else if (['ethereum', 'eth'].includes(network)) {
+  } else if (['mainnet', 'ethereum', 'eth'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {
-      wNative: '',
-      factoryV2: '',
-      factoryV3: '',
-      stableUsdTokens: [],
-      oracleTokens: [],
+      wNative: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+      factoryV2: '0xBAe5dc9B19004883d0377419FeF3c2C8832d7d7B', // ApeFactory
+      factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
+      stableUsdTokens: [
+        '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+        '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+      ],
+      oracleTokens: [
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+        '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+        '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+      ],
       // https://docs.chain.link/data-feeds/price-feeds/addresses?network=ethereum
-      oracles: [],
+      oracles: [
+        '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // ETH/USD
+        '0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9', // DAI/USD
+        '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6', // USDC/USD
+        '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D', // USDT/USD
+      ],
     }
   } else if (['arbitrum'].includes(network)) {
     console.log(`Deploying with ${network} config.`)

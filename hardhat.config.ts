@@ -113,7 +113,7 @@ type ExtendedHardhatNetworkConfig = {
 
 const networkConfig: ExtendedHardhatNetworkConfig = {
   mainnet: {
-    url: getEnv('MAINNET_RPC_URL') || '',
+    url: getEnv('MAINNET_RPC_URL') || 'https://eth.llamarpc.com	',
     getExplorerUrl: (address: string) => `https://etherscan.io/address/${address}`,
     chainId: 1,
     accounts: {
