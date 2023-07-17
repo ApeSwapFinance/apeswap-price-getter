@@ -99,6 +99,15 @@ export class DeployManager {
     return contractInstance as ReturnType<C['deploy']>
   }
 
+  addDeployedContract(filePath) {
+    try {
+      const deployedContractDetails = fs.readFileSync('deployments/' + filePath, { encoding: 'utf8' })
+      this.deployedContracts.push(...JSON.parse(deployedContractDetails))
+    } catch (error) {
+      logger.error(`Failed reading contract details: ${error}`)
+    }
+  }
+
   async verifyContracts() {
     for (const contract of this.deployedContracts) {
       logger.logHeader(`Verifying ${contract.name} at ${contract.address}`, `➡️`)
@@ -122,9 +131,9 @@ export class DeployManager {
     const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '') // e.g. 20230330
     const networkName = network.name
 
-    const filePath = this.baseDir + `/${dateString}-${networkName}-deployment.js`
+    const filePath = this.baseDir + `/${dateString}-${networkName}-deployment.json`
     try {
-      fs.writeFileSync(filePath, `module.exports = ${paramsString};`)
+      fs.writeFileSync(filePath, paramsString)
       logger.success(`Contract details saved to ${filePath}!`)
     } catch (error) {
       logger.error(`Failed saving contract details to file: ${error}`)

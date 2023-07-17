@@ -30,10 +30,21 @@ contract PriceGetterExtended is IPriceGetterV1, PriceGetterV2 {
         address _wNative,
         IApeFactory _defaultFactoryV2,
         IUniswapV3Factory _defaultFactoryV3,
+        IAlgebraFactory _defaultFactoryAlgebra,
         address[] memory _stableUsdTokens,
         address[] memory _oracleTokens,
         address[] memory _oracles
-    ) PriceGetterV2(_wNative, _defaultFactoryV2, _defaultFactoryV3, _stableUsdTokens, _oracleTokens, _oracles) {}
+    )
+        PriceGetterV2(
+            _wNative,
+            _defaultFactoryV2,
+            _defaultFactoryV3,
+            _defaultFactoryAlgebra,
+            _stableUsdTokens,
+            _oracleTokens,
+            _oracles
+        )
+    {}
 
     function DECIMALS() external pure returns (uint256) {
         return 18;

@@ -7,6 +7,7 @@ import "./swap-v2-lib/IApeFactory.sol";
 import "./chainlink/ChainlinkOracle.sol";
 import "./IPriceGetterV2.sol";
 import "./interfaces/IUniswapV3PoolStateSlot0.sol";
+import "./interfaces/IAlgebraPool.sol";
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
@@ -18,7 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 /**
-DISCLAIMER:
+DISCLAIMER: 
 This smart contract is provided for user interface purposes only and is not intended to be used for smart contract logic. 
 Any attempt to rely on this code for the execution of a smart contract may result in unexpected behavior, 
 errors, or other issues that could lead to financial loss or other damages. 
@@ -51,9 +52,10 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
     uint8 wNativeDecimals;
     address[] public stableUsdTokens;
     mapping(address => uint8) public stableUsdTokenDecimals;
-    IApeFactory defaultFactoryV2;
-    IUniswapV3Factory defaultFactoryV3;
-    uint24 secondsAgo = 0;
+    IApeFactory public defaultFactoryV2;
+    IUniswapV3Factory public defaultFactoryV3;
+    IAlgebraFactory public defaultFactoryAlgebra;
+    uint24 public secondsAgo = 0;
 
     /**
      * @dev This contract constructor takes in several parameters which includes the wrapped native token address,
@@ -71,6 +73,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         address _wNative,
         IApeFactory _defaultFactoryV2,
         IUniswapV3Factory _defaultFactoryV3,
+        IAlgebraFactory _defaultFactoryAlgebra,
         address[] memory _stableUsdTokens,
         address[] memory _oracleTokens,
         address[] memory _oracles
@@ -94,6 +97,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         // Set the factory addresses
         defaultFactoryV2 = _defaultFactoryV2;
         defaultFactoryV3 = _defaultFactoryV3;
+        defaultFactoryAlgebra = _defaultFactoryAlgebra;
     }
 
     /** SETTERS */
@@ -117,7 +121,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param oracleAddress The address of the oracle contract.
      * @param oracleType The type of the oracle (e.g. Chainlink, Uniswap).
      */
-    function setTokenOracle(address token, address oracleAddress, OracleType oracleType) public onlyOwner {
+    function setTokenOracle(
+        address token,
+        address oracleAddress,
+        OracleType oracleType
+    ) public onlyOwner {
         _setTokenOracle(token, oracleAddress, oracleType);
     }
 
@@ -135,7 +143,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param oracleAddress The address of the oracle contract.
      * @param oracleType The type of the oracle (e.g. Chainlink, Uniswap).
      */
-    function _setTokenOracle(address token, address oracleAddress, OracleType oracleType) internal {
+    function _setTokenOracle(
+        address token,
+        address oracleAddress,
+        OracleType oracleType
+    ) internal {
         uint8 oracleDecimals = 18;
         try IERC20(oracleAddress).decimals() returns (uint8 dec) {
             oracleDecimals = dec;
@@ -202,13 +214,13 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param tokens An array of token addresses
      * @return prices An array of prices for each corresponding liquidity pool
      */
-    function getLPPricesV2FromFactory(
-        IApeFactory factoryV2,
-        address[] calldata tokens
-    ) public view returns (uint256[] memory prices) {
-        uint256 tokensLength = tokens.length;
-        prices = new uint256[](tokensLength);
-        for (uint256 i; i < tokensLength; i++) {
+    function getLPPricesV2FromFactory(IApeFactory factoryV2, address[] calldata tokens)
+        public
+        view
+        returns (uint256[] memory prices)
+    {
+        prices = new uint256[](tokens.length);
+        for (uint256 i; i < prices.length; i++) {
             address token = tokens[i];
             prices[i] = getLPPriceV2FromFactory(factoryV2, token);
         }
@@ -221,8 +233,48 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param fee The Uniswap V3 pool fee.
      * @return price The price of the LP token.
      */
-    function getLPPriceV3(address token0, address token1, uint24 fee) public view override returns (uint256 price) {
-        return getLPPriceV3FromFactory(defaultFactoryV3, token0, token1, fee);
+    function getLPPriceV3(
+        address token0,
+        address token1,
+        uint24 fee
+    ) public view override returns (uint256 price) {
+        return getLPPriceV3FromFactory(address(defaultFactoryV3), token0, token1, fee);
+    }
+
+    /**
+     * @dev Returns the price of an LP token.
+     * @param token0 The address of the first token in the LP pair.
+     * @param token1 The address of the second token in the LP pair.
+     * @return price The price of the LP token.
+     */
+    function getLPPriceAlgebra(address token0, address token1) public view override returns (uint256 price) {
+        return getLPPriceAlgebraFromFactory(defaultFactoryAlgebra, token0, token1);
+    }
+
+    /**
+     * @dev Returns the price of a gamma LP token.
+     * @param lp The address of the gamma LP pair.
+     * @return price The price of the gamma LP token.
+     */
+    function getLPPriceGamma(Hypervisor lp) public view override returns (uint256 price) {
+        (uint256 priceToken0, ) = _getPriceAlgebra(defaultFactoryAlgebra, address(lp.token0()));
+        (uint256 priceToken1, ) = _getPriceAlgebra(defaultFactoryAlgebra, address(lp.token1()));
+        (uint256 total0, uint256 total1) = lp.getTotalAmounts();
+        price = (priceToken0 * total0 + priceToken1 * total1) / lp.totalSupply();
+    }
+
+    /**
+     * @dev Returns the price of an LP token.
+     * @param token0 The address of the first token in the LP pair.
+     * @param token1 The address of the second token in the LP pair.
+     * @return price The price of the LP token.
+     */
+    function getLPPriceAlgebraFromFactory(
+        IAlgebraFactory factoryAlgebra,
+        address token0,
+        address token1
+    ) public view override returns (uint256 price) {
+        return getLPPriceV3FromFactory(address(factoryAlgebra), token0, token1, 0);
     }
 
     /**
@@ -237,15 +289,21 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param token0 The address of one token in the liquidity pool
      * @param token1 The address of the other token in the liquidity pool
      * @param fee The fee amount of the liquidity pool
+     * @dev If fee set to 0 it gets price from algebra
      * @return price The price of the liquidity pool
      */
     function getLPPriceV3FromFactory(
-        IUniswapV3Factory factoryV3,
+        address factoryV3,
         address token0,
         address token1,
         uint24 fee
     ) public view override returns (uint256 price) {
-        address tokenPegPair = factoryV3.getPool(token0, token1, fee);
+        address tokenPegPair;
+        if (fee == 0) {
+            tokenPegPair = IAlgebraFactory(factoryV3).poolByPair(token0, token1);
+        } else {
+            tokenPegPair = IUniswapV3Factory(factoryV3).getPool(token0, token1, fee);
+        }
 
         // if the address has no contract deployed, the pair doesn't exist
         uint256 size;
@@ -257,10 +315,13 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         if (size == 0) return 0;
 
         uint256 sqrtPriceX96;
-
         if (secondsAgo == 0) {
             // return the current price if secondsAgo == 0
-            (sqrtPriceX96, , , , , , ) = IUniswapV3PoolStateSlot0(tokenPegPair).slot0();
+            if (fee == 0) {
+                (sqrtPriceX96, , , , , , ) = IAlgebraPool(tokenPegPair).globalState();
+            } else {
+                (sqrtPriceX96, , , , , , ) = IUniswapV3PoolStateSlot0(tokenPegPair).slot0();
+            }
         } else {
             uint32[] memory secondsAgos = new uint32[](2);
             secondsAgos[0] = secondsAgo; // from (before)
@@ -300,12 +361,12 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
 
         if (token1 < token0) {
             price =
-                (2 ** 192) /
-                ((sqrtPriceX96) ** 2 / uint256(10 ** (token0Decimals + 18 - token1Decimals - decimalCorrection)));
+                (2**192) /
+                ((sqrtPriceX96)**2 / uint256(10**(token0Decimals + 18 - token1Decimals - decimalCorrection)));
         } else {
             price =
-                ((sqrtPriceX96) ** 2) /
-                ((2 ** 192) / uint256(10 ** (token0Decimals + 18 - token1Decimals - decimalCorrection)));
+                ((sqrtPriceX96)**2) /
+                ((2**192) / uint256(10**(token0Decimals + 18 - token1Decimals - decimalCorrection)));
         }
     }
 
@@ -352,7 +413,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
             address token0 = tokens0[i];
             address token1 = tokens1[i];
             uint24 fee = fees[i];
-            prices[i] = getLPPriceV3FromFactory(factoryV3, token0, token1, fee);
+            prices[i] = getLPPriceV3FromFactory(address(factoryV3), token0, token1, fee);
         }
     }
 
@@ -389,6 +450,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         } else if (protocol == Protocol.V3) {
             (uint256 nativeV3Price, ) = _getNativePriceV3(factoryV3);
             return nativeV3Price;
+        } else if (protocol == Protocol.Algebra) {
+            (uint256 nativeAlgebraPrice, ) = _getNativePriceAlgebra(defaultFactoryAlgebra);
+            return nativeAlgebraPrice;
         } else {
             revert("Invalid protocol");
         }
@@ -433,9 +497,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @return price The price of wNative in USD
      * @return wNativeTotal The total amount of wNative in the pools.
      */
-    function _getNativePriceV3(
-        IUniswapV3Factory factoryV3
-    ) internal view returns (uint256 price, uint256 wNativeTotal) {
+    function _getNativePriceV3(IUniswapV3Factory factoryV3)
+        internal
+        view
+        returns (uint256 price, uint256 wNativeTotal)
+    {
         uint256 totalPrice;
 
         uint24[] memory fees = new uint24[](4);
@@ -449,7 +515,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
             // Loop through each stable usd token
             for (uint256 i = 0; i < stableUsdTokens.length; i++) {
                 address stableUsdToken = stableUsdTokens[i];
-                price = getLPPriceV3FromFactory(factoryV3, wNative, stableUsdToken, fee);
+                price = getLPPriceV3FromFactory(address(factoryV3), wNative, stableUsdToken, fee);
                 uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
                 if (stableUsdPrice > 0) {
                     price = (price * stableUsdPrice) / 1e18;
@@ -460,6 +526,42 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
                     totalPrice += price * balance;
                     wNativeTotal += balance;
                 }
+            }
+        }
+
+        if (wNativeTotal == 0) {
+            return (0, wNativeTotal);
+        }
+        price = totalPrice / wNativeTotal;
+    }
+
+    /**
+     * @dev Calculates the price of wNative using V3 pricing.
+     * Uses Uniswap V3 pools with various fees and stable tokens.
+     * @param factoryAlgebra The address of the V3 factory
+     * @return price The price of wNative in USD
+     * @return wNativeTotal The total amount of wNative in the pools.
+     */
+    function _getNativePriceAlgebra(IAlgebraFactory factoryAlgebra)
+        internal
+        view
+        returns (uint256 price, uint256 wNativeTotal)
+    {
+        uint256 totalPrice;
+
+        // Loop through each stable usd token
+        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
+            address stableUsdToken = stableUsdTokens[i];
+            price = getLPPriceV3FromFactory(address(factoryAlgebra), wNative, stableUsdToken, 0);
+            uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
+            if (stableUsdPrice > 0) {
+                price = (price * stableUsdPrice) / 1e18;
+            }
+            if (price > 0) {
+                address pair = factoryAlgebra.poolByPair(wNative, stableUsdToken);
+                uint256 balance = IERC20(wNative).balanceOf(pair);
+                totalPrice += price * balance;
+                wNativeTotal += balance;
             }
         }
 
@@ -481,29 +583,33 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @return price The price of the token in USD.
      */
     function getPrice(address token, Protocol protocol) public view override returns (uint256 price) {
-        return getPriceFromFactory(token, protocol, defaultFactoryV2, defaultFactoryV3);
+        return getPriceFromFactory(token, protocol, defaultFactoryV2, defaultFactoryV3, defaultFactoryAlgebra);
     }
 
     function getPriceFromFactory(
         address token,
         Protocol protocol,
         IApeFactory factoryV2,
-        IUniswapV3Factory factoryV3
+        IUniswapV3Factory factoryV3,
+        IAlgebraFactory factoryAlgebra
     ) public view override returns (uint256 price) {
         if (token == wNative) {
             return getNativePriceFromFactory(protocol, factoryV2, factoryV3);
         }
 
         if (protocol == Protocol.Both) {
-            (uint256 ETHV3Price, uint256 totalETHV3) = _getPriceV3(factoryV3, token);
-            (uint256 ETHV2Price, uint256 totalETHV2) = _getPriceV2(factoryV2, token);
-            return (ETHV3Price * totalETHV3 + ETHV2Price * totalETHV2) / (totalETHV3 + totalETHV2);
+            (uint256 tokenV3Price, uint256 totalTokenV3) = _getPriceV3(factoryV3, token);
+            (uint256 tokenV2Price, uint256 totalTokenV2) = _getPriceV2(factoryV2, token);
+            return (tokenV3Price * totalTokenV3 + tokenV2Price * totalTokenV2) / (totalTokenV3 + totalTokenV2);
         } else if (protocol == Protocol.V2) {
-            (uint256 ETHV2Price, ) = _getPriceV2(factoryV2, token);
-            return ETHV2Price;
+            (uint256 tokenV2Price, ) = _getPriceV2(factoryV2, token);
+            return tokenV2Price;
         } else if (protocol == Protocol.V3) {
-            (uint256 ETHV3Price, ) = _getPriceV3(factoryV3, token);
-            return ETHV3Price;
+            (uint256 tokenV3Price, ) = _getPriceV3(factoryV3, token);
+            return tokenV3Price;
+        } else if (protocol == Protocol.Algebra) {
+            (uint256 tokenAlgebraPrice, ) = _getPriceAlgebra(factoryAlgebra, token);
+            return tokenAlgebraPrice;
         } else {
             revert("Invalid protocol");
         }
@@ -515,25 +621,28 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param protocol The liquidity protocol used to calculate the prices.
      * @return prices An array of prices for the given tokens in USD.
      */
-    function getPrices(
-        address[] calldata tokens,
-        Protocol protocol
-    ) public view override returns (uint256[] memory prices) {
-        prices = getPricesFromFactory(tokens, protocol, defaultFactoryV2, defaultFactoryV3);
+    function getPrices(address[] calldata tokens, Protocol protocol)
+        public
+        view
+        override
+        returns (uint256[] memory prices)
+    {
+        prices = getPricesFromFactory(tokens, protocol, defaultFactoryV2, defaultFactoryV3, defaultFactoryAlgebra);
     }
 
     function getPricesFromFactory(
         address[] calldata tokens,
         Protocol protocol,
         IApeFactory factoryV2,
-        IUniswapV3Factory factoryV3
+        IUniswapV3Factory factoryV3,
+        IAlgebraFactory factoryAlgebra
     ) public view override returns (uint256[] memory prices) {
         uint256 tokenLength = tokens.length;
         prices = new uint256[](tokenLength);
 
         for (uint256 i; i < tokenLength; i++) {
             address token = tokens[i];
-            prices[i] = getPriceFromFactory(token, protocol, factoryV2, factoryV3);
+            prices[i] = getPriceFromFactory(token, protocol, factoryV2, factoryV3, factoryAlgebra);
         }
     }
 
@@ -551,10 +660,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @return price The price of the token based on the V2 liquidity pool.
      * @return tokenTotal Total balance of the token based on the V2 liquidity pool.
      */
-    function _getPriceV2(
-        IApeFactory factoryV2,
-        address token
-    ) internal view returns (uint256 price, uint256 tokenTotal) {
+    function _getPriceV2(IApeFactory factoryV2, address token)
+        internal
+        view
+        returns (uint256 price, uint256 tokenTotal)
+    {
         uint256 nativePrice = getNativePriceFromFactory(Protocol.V2, defaultFactoryV2, IUniswapV3Factory(address(0)));
         if (token == wNative) {
             /// @dev Returning high total balance for wNative to heavily weight value.
@@ -602,10 +712,12 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         (price, ) = _getPriceV3(defaultFactoryV3, token);
     }
 
-    function getPriceV3FromFactory(
-        IUniswapV3Factory factoryV3,
-        address token
-    ) public view override returns (uint256 price) {
+    function getPriceV3FromFactory(IUniswapV3Factory factoryV3, address token)
+        public
+        view
+        override
+        returns (uint256 price)
+    {
         (price, ) = _getPriceV3(factoryV3, token);
     }
 
@@ -614,10 +726,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
      * @param token Address of the token for which the price and total balance are requested.
      * @return price The price of the token based on the V3 liquidity pool.
      */
-    function _getPriceV3(
-        IUniswapV3Factory factoryV3,
-        address token
-    ) internal view returns (uint256 price, uint256 totalBalance) {
+    function _getPriceV3(IUniswapV3Factory factoryV3, address token)
+        internal
+        view
+        returns (uint256 price, uint256 totalBalance)
+    {
         uint256 nativePrice = getNativePriceFromFactory(Protocol.V3, IApeFactory(address(0)), factoryV3);
         if (token == wNative) {
             /// @dev Returning high total balance for wNative to heavily weight value.
@@ -633,7 +746,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         fees[3] = 10000;
         for (uint24 feeIndex = 0; feeIndex < 4; feeIndex++) {
             uint24 fee = fees[feeIndex];
-            tempPrice = getLPPriceV3FromFactory(factoryV3, token, wNative, fee);
+            tempPrice = getLPPriceV3FromFactory(address(factoryV3), token, wNative, fee);
             if (tempPrice > 0) {
                 address pair = factoryV3.getPool(token, wNative, fee);
                 uint256 balance = IERC20(token).balanceOf(pair);
@@ -643,15 +756,66 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
 
             for (uint256 i = 0; i < stableUsdTokens.length; i++) {
                 address stableUsdToken = stableUsdTokens[i];
-                tempPrice = getLPPriceV3FromFactory(factoryV3, token, stableUsdToken, fee);
+                tempPrice = getLPPriceV3FromFactory(address(factoryV3), token, stableUsdToken, fee);
                 if (tempPrice > 0) {
+                    address pair = factoryV3.getPool(token, stableUsdToken, fee);
+                    uint256 balance = IERC20(token).balanceOf(pair);
+                    if (balance > 100 * (10**IERC20(token).decimals())) {
+                        uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
+                        if (stableUsdPrice > 0) {
+                            tempPrice = (tempPrice * stableUsdPrice) / 1e18;
+                        }
+
+                        totalPrice += tempPrice * balance;
+                        totalBalance += balance;
+                    }
+                }
+            }
+        }
+
+        if (totalBalance == 0) {
+            return (0, 0);
+        }
+        price = totalPrice / totalBalance;
+    }
+
+    function _getPriceAlgebra(IAlgebraFactory factoryAlgebra, address token)
+        internal
+        view
+        returns (uint256 price, uint256 totalBalance)
+    {
+        uint256 nativePrice = getNativePriceFromFactory(
+            Protocol.Algebra,
+            IApeFactory(address(0)),
+            IUniswapV3Factory(address(0))
+        );
+        if (token == wNative) {
+            /// @dev Returning high total balance for wNative to heavily weight value.
+            return (nativePrice, 1e36);
+        }
+
+        uint256 tempPrice;
+        uint256 totalPrice;
+        tempPrice = getLPPriceAlgebraFromFactory(factoryAlgebra, token, wNative);
+        if (tempPrice > 0) {
+            address pair = factoryAlgebra.poolByPair(token, wNative);
+            uint256 balance = IERC20(token).balanceOf(pair);
+            totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
+            totalBalance += balance;
+        }
+
+        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
+            address stableUsdToken = stableUsdTokens[i];
+            tempPrice = getLPPriceAlgebraFromFactory(factoryAlgebra, token, stableUsdToken);
+            if (tempPrice > 0) {
+                address pair = factoryAlgebra.poolByPair(token, stableUsdToken);
+                uint256 balance = IERC20(token).balanceOf(pair);
+                if (balance > 100 * (10**IERC20(token).decimals())) {
                     uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
                     if (stableUsdPrice > 0) {
                         tempPrice = (tempPrice * stableUsdPrice) / 1e18;
                     }
 
-                    address pair = factoryV3.getPool(token, stableUsdToken, fee);
-                    uint256 balance = IERC20(token).balanceOf(pair);
                     totalPrice += tempPrice * balance;
                     totalBalance += balance;
                 }
@@ -709,7 +873,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
 
         // Calculate the price of tokenA in terms of tokenB by dividing the normalized reserve value of tokenA
         // from the normalized reserve value of tokenB.
-        priceAForB = (normalizedReserveA * (10 ** 18)) / normalizedReserveB;
+        priceAForB = (normalizedReserveA * (10**18)) / normalizedReserveB;
     }
 
     /**
@@ -825,7 +989,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
     /// @notice Normalize the amount passed to wei or 1e18 decimals
     function _normalize(uint256 amount, uint8 decimals) private pure returns (uint256) {
         if (decimals == 18) return amount;
-        return (amount * (10 ** 18)) / (10 ** decimals);
+        return (amount * (10**18)) / (10**decimals);
     }
 
     /// @notice Normalize the amount passed to wei or 1e18 decimals
@@ -833,9 +997,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Ownable {
         if (decimals == 18) {
             return amount;
         } else if (decimals > 18) {
-            return uint112(amount / (10 ** (decimals - 18)));
+            return uint112(amount / (10**(decimals - 18)));
         } else {
-            return uint112(amount * (10 ** (18 - decimals)));
+            return uint112(amount * (10**(18 - decimals)));
         }
     }
 }

@@ -9,6 +9,7 @@ function getNetworkConfig(network: any) {
       wNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
       factoryV2: '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6',
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
+      factoryAlgebra: '',
       stableUsdTokens: [
         '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
         '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
@@ -34,6 +35,7 @@ function getNetworkConfig(network: any) {
       wNative: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284', // Polygon ApeSwap V2 Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
+      factoryAlgebra: '0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28', // Algebra Factory
       stableUsdTokens: [
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
@@ -84,6 +86,7 @@ function getNetworkConfig(network: any) {
       wNative: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284',
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
+      factoryAlgebra: '',
       stableUsdTokens: [
         '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
         '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
@@ -109,6 +112,7 @@ function getNetworkConfig(network: any) {
       wNative: '',
       factoryV2: '',
       factoryV3: '',
+      factoryAlgebra: '',
       stableUsdTokens: [],
       oracleTokens: [],
       oracles: [],
