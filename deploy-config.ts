@@ -9,7 +9,7 @@ function getNetworkConfig(network: any) {
       wNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
       factoryV2: '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6',
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
-      factoryAlgebra: '',
+      factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
       stableUsdTokens: [
         '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
         '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
@@ -33,6 +33,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+      // factoryV2: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32', // Polygon Quicskwap factory
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284', // Polygon ApeSwap V2 Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
       factoryAlgebra: '0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28', // Algebra Factory
@@ -61,6 +62,7 @@ function getNetworkConfig(network: any) {
       wNative: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
       factoryV2: '0xBAe5dc9B19004883d0377419FeF3c2C8832d7d7B', // ApeFactory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
+      factoryAlgebra: '', // Algebra Factory
       stableUsdTokens: [
         '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
         '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
@@ -86,7 +88,7 @@ function getNetworkConfig(network: any) {
       wNative: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284',
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
-      factoryAlgebra: '',
+      factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
       stableUsdTokens: [
         '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
         '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC

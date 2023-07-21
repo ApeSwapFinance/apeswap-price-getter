@@ -12,7 +12,8 @@ interface IPriceGetterV2 {
         Both,
         V2,
         V3,
-        Algebra
+        Algebra,
+        Gamma
     }
 
     function getLPPriceV2(address lp) external view returns (uint256 price);
@@ -21,16 +22,12 @@ interface IPriceGetterV2 {
 
     function getLPPriceV2FromFactory(IApeFactory factoryV2, address lp) external view returns (uint256 price);
 
-    function getLPPricesV2FromFactory(IApeFactory factoryV2, address[] calldata tokens)
-        external
-        view
-        returns (uint256[] memory prices);
+    function getLPPricesV2FromFactory(
+        IApeFactory factoryV2,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory prices);
 
-    function getLPPriceV3(
-        address token0,
-        address token1,
-        uint24 fee
-    ) external view returns (uint256 price);
+    function getLPPriceV3(address token0, address token1, uint24 fee) external view returns (uint256 price);
 
     function getLPPricesV3(
         address[] calldata tokens0,
@@ -62,6 +59,20 @@ interface IPriceGetterV2 {
 
     function getLPPriceGamma(Hypervisor lp) external view returns (uint256 price);
 
+    function getLPPriceGammaFromFactory(
+        IAlgebraFactory factory,
+        IApeFactory factoryV2,
+        Hypervisor lp
+    ) external view returns (uint256 price);
+
+    function getLPPriceFromFactory(
+        address token,
+        Protocol protocol,
+        IApeFactory factoryV2,
+        IUniswapV3Factory factoryV3,
+        IAlgebraFactory factoryAlgebra
+    ) external view returns (uint256 price);
+
     function getPriceV2(address token) external view returns (uint256 price);
 
     function getPriceV2FromFactory(IApeFactory factoryV2, address token) external view returns (uint256 price);
@@ -69,6 +80,13 @@ interface IPriceGetterV2 {
     function getPriceV3(address token) external view returns (uint256 price);
 
     function getPriceV3FromFactory(IUniswapV3Factory factoryV3, address token) external view returns (uint256 price);
+
+    function getPriceAlgebra(address token) external view returns (uint256 price);
+
+    function getPriceAlgebraFromFactory(
+        IAlgebraFactory factoryAlgebra,
+        address token
+    ) external view returns (uint256 price);
 
     function getPrice(address token, Protocol protocol) external view returns (uint256 price);
 
