@@ -5,6 +5,7 @@ import "./swap-v2-lib/IApeFactory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "./interfaces/IAlgebraFactory.sol";
 import "./interfaces/IGammaHypervisor.sol";
+import "./interfaces/ISteerVault.sol";
 
 interface IPriceGetterV2 {
     enum Protocol {
@@ -13,7 +14,8 @@ interface IPriceGetterV2 {
         V2,
         V3,
         Algebra,
-        Gamma
+        Gamma,
+        Steer
     }
 
     function getLPPriceV2(address lp) external view returns (uint256 price);
@@ -63,6 +65,12 @@ interface IPriceGetterV2 {
         IAlgebraFactory factory,
         IApeFactory factoryV2,
         Hypervisor lp
+    ) external view returns (uint256 price);
+
+    function getLPPriceSteerFromFactory(
+        IUniswapV3Factory factoryV3,
+        IApeFactory factoryV2,
+        ISteerVault lp
     ) external view returns (uint256 price);
 
     function getLPPriceFromFactory(

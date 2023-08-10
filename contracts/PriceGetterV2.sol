@@ -270,13 +270,48 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         IApeFactory factoryV2,
         Hypervisor lp
     ) public view override returns (uint256 price) {
+        if (address(factoryV2) == address(0)) {
+            factoryV2 = defaultFactoryV2;
+        }
         (uint256 priceToken0, ) = _getPriceAlgebra(factory, address(lp.token0()));
         if (priceToken0 == 0) {
-            (priceToken0, ) = _getPriceV2(defaultFactoryV2, address(lp.token0()));
+            (priceToken0, ) = _getPriceV2(factoryV2, address(lp.token0()));
         }
         (uint256 priceToken1, ) = _getPriceAlgebra(factory, address(lp.token1()));
         if (priceToken1 == 0) {
-            (priceToken1, ) = _getPriceV2(defaultFactoryV2, address(lp.token0()));
+            (priceToken1, ) = _getPriceV2(factoryV2, address(lp.token0()));
+        }
+        (uint256 total0, uint256 total1) = lp.getTotalAmounts();
+        price =
+            (priceToken0 *
+                _normalizeToken(total0, address(lp.token0())) +
+                priceToken1 *
+                _normalizeToken(total1, address(lp.token1()))) /
+            lp.totalSupply();
+    }
+
+    /**
+     * @dev Returns the price of a steer LP token.
+     * @param factoryV3 The address of the V3 factory
+     * @param factoryV2 The address of the V2 factory
+     * @param lp The address of the steer LP pair.
+     * @return price The price of the steer LP token.
+     */
+    function getLPPriceSteerFromFactory(
+        IUniswapV3Factory factoryV3,
+        IApeFactory factoryV2,
+        ISteerVault lp
+    ) public view override returns (uint256 price) {
+        if (address(factoryV2) == address(0)) {
+            factoryV2 = defaultFactoryV2;
+        }
+        (uint256 priceToken0, ) = _getPriceV3(factoryV3, address(lp.token0()));
+        if (priceToken0 == 0) {
+            (priceToken0, ) = _getPriceV2(factoryV2, address(lp.token0()));
+        }
+        (uint256 priceToken1, ) = _getPriceV3(factoryV3, address(lp.token1()));
+        if (priceToken1 == 0) {
+            (priceToken1, ) = _getPriceV2(factoryV2, address(lp.token0()));
         }
         (uint256 total0, uint256 total1) = lp.getTotalAmounts();
         price =
@@ -470,6 +505,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         } else if (protocol == Protocol.Gamma) {
             uint256 lpAlgebraPrice = getLPPriceGammaFromFactory(factoryAlgebra, factoryV2, Hypervisor(token));
             return lpAlgebraPrice;
+        } else if (protocol == Protocol.Steer) {
+            uint256 lpSteerPrice = getLPPriceSteerFromFactory(factoryV3, factoryV2, ISteerVault(token));
+            return lpSteerPrice;
         } else {
             revert("Invalid protocol");
         }
