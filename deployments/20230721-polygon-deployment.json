@@ -1,0 +1,32 @@
+[
+  {
+    "name": "PriceGetterExtended",
+    "address": "0x241ebA867Bee0Dd50a8Ca54732A6C05815C50Cc5",
+    "encodedConstructorArgs": "",
+    "constructorArguments": [
+      "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+      "0xCf083Be4164828f00cAE704EC15a36D711491284",
+      "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28",
+      [
+        "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+        "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+        "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
+      ],
+      [
+        "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+        "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+        "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+        "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
+      ],
+      [
+        "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+        "0x4746DeC9e833A82EC7C2C1356372CcF2cfcD2F3D",
+        "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7",
+        "0x0A6513e40db6EB1b165753AD52E80663aeA50545"
+      ]
+    ],
+    "verificationCommand": "npx hardhat verify --network polygon 0x241ebA867Bee0Dd50a8Ca54732A6C05815C50Cc5 ",
+    "upgradeableProxy": true
+  }
+]
