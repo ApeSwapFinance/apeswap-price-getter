@@ -99,6 +99,7 @@ task(TASK_TEST, '🫶 Test Task')
 
 export const mainnetMnemonic = getEnv('MAINNET_MNEMONIC')
 export const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
+export const mainnetDeployerKey = getEnv('MAINNET_DEPLOYER_KEY')
 
 type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
@@ -113,12 +114,10 @@ type ExtendedHardhatNetworkConfig = {
 
 const networkConfig: ExtendedHardhatNetworkConfig = {
   mainnet: {
-    url: getEnv('MAINNET_RPC_URL') || 'https://eth.llamarpc.com	',
+    url: getEnv('MAINNET_RPC_URL') || 'https://rpc.ankr.com/eth',
     getExplorerUrl: (address: string) => `https://etherscan.io/address/${address}`,
     chainId: 1,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: [mainnetDeployerKey],
   },
   goerli: {
     url: getEnv('GOERLI_RPC_URL') || '',
@@ -132,9 +131,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     url: getEnv('ARBITRUM_RPC_URL') || 'https://arbitrum-one.publicnode.com',
     getExplorerUrl: (address: string) => `https://arbiscan.io/address/${address}`,
     chainId: 42161,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: [mainnetDeployerKey],
   },
   arbitrumGoerli: {
     url: getEnv('ARBITRUM_GOERLI_RPC_URL') || '',
@@ -148,9 +145,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     url: getEnv('BSC_RPC_URL') || 'https://bsc-dataseed1.binance.org',
     getExplorerUrl: (address: string) => `https://bscscan.com/address/${address}`,
     chainId: 56,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: [mainnetDeployerKey],
   },
   bscTestnet: {
     url: getEnv('BSC_TESTNET_RPC_URL') || 'https://data-seed-prebsc-1-s1.binance.org:8545',
@@ -164,9 +159,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     url: getEnv('POLYGON_RPC_URL') || 'https://polygon.llamarpc.com	',
     getExplorerUrl: (address: string) => `https://polygonscan.com/address/${address}`,
     chainId: 137,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: [mainnetDeployerKey],
   },
   polygonTestnet: {
     url: getEnv('POLYGON_TESTNET_RPC_URL') || 'https://rpc-mumbai.maticvigil.com/',
