@@ -708,13 +708,14 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     ) internal view returns (uint256 price, uint256 wNativeTotal) {
         uint256 totalPrice;
 
-        uint24[] memory fees = new uint24[](4);
+        uint24[] memory fees = new uint24[](5);
         fees[0] = 100;
         fees[1] = 500;
-        fees[2] = 3000;
-        fees[3] = 10000;
+        fees[2] = 2500;
+        fees[3] = 3000;
+        fees[4] = 10000;
         // Loop through each feeIndex
-        for (uint24 feeIndex = 0; feeIndex < 4; feeIndex++) {
+        for (uint24 feeIndex = 0; feeIndex < 5; feeIndex++) {
             uint24 fee = fees[feeIndex];
             // Loop through each stable usd token
             for (uint256 i = 0; i < stableUsdTokens.length; i++) {
@@ -1026,12 +1027,13 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
 
         uint256 tempPrice;
         uint256 totalPrice;
-        uint24[] memory fees = new uint24[](4);
+        uint24[] memory fees = new uint24[](5);
         fees[0] = 100;
         fees[1] = 500;
-        fees[2] = 3000;
-        fees[3] = 10000;
-        for (uint24 feeIndex = 0; feeIndex < 4; feeIndex++) {
+        fees[2] = 2500;
+        fees[3] = 3000;
+        fees[4] = 10000;
+        for (uint24 feeIndex = 0; feeIndex < 5; feeIndex++) {
             uint24 fee = fees[feeIndex];
             tempPrice = getLPPriceV3FromFactory(address(factoryV3), token, wNative, fee);
             if (tempPrice > 0) {
