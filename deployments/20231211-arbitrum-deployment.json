@@ -1,0 +1,10 @@
+[
+  {
+    "name": "PriceGetterExtended",
+    "address": "0xe6828D65bf5023AE1851D90D8783Cc821ba7eeE1",
+    "encodedConstructorArgs": "0x",
+    "constructorArguments": [],
+    "verificationCommand": "npx hardhat verify --network arbitrum 0xe6828D65bf5023AE1851D90D8783Cc821ba7eeE1 ",
+    "upgradeableProxy": false
+  }
+]
