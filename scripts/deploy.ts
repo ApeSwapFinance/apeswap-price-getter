@@ -3,10 +3,20 @@ import hre from 'hardhat'
 import getNetworkConfig from '../deploy-config'
 
 async function main() {
-  const { wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles } = getNetworkConfig(hre.network.name)
+  const { wNative, factoryV2, factoryV3, factoryAlgebra, stableUsdTokens, oracleTokens, oracles } = getNetworkConfig(
+    hre.network.name
+  )
 
-  const PriceGetter = await ethers.getContractFactory('PriceGetter')
-  const priceGetter = await PriceGetter.deploy(wNative, factoryV2, factoryV3, stableUsdTokens, oracleTokens, oracles)
+  const PriceGetter = await ethers.getContractFactory('PriceGetterExtended  ')
+  const priceGetter = await PriceGetter.deploy(
+    wNative,
+    factoryV2,
+    factoryV3,
+    factoryAlgebra,
+    stableUsdTokens,
+    oracleTokens,
+    oracles
+  )
 
   await priceGetter.deployed()
 

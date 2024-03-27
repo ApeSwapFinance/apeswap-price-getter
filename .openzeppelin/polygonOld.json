@@ -1,0 +1,675 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x87BfcF331c486e04f08070090fc8Cd5296Ad206D",
+    "txHash": "0x9d1935d936d675f21be43e270abf077d2e89213a686a0e1a5c2f2489f48ed708"
+  },
+  "proxies": [
+    {
+      "address": "0xFDF2aFf38685597c55078142145Ce70B30B537d4",
+      "txHash": "0xd97262105371d670b391b4100fba0d5c704e80b7e21e626e98a70c15c907ebd0",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5728dA103B3e5E05d3c59370adA118e3CCD32766",
+      "txHash": "0x952f5d23342023f4515f9d539feedb5789d448cbb1d0e0fc52cd6d8734811fdd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xbcE549417A355b41205FA2fc58cEAe659C9d9328",
+      "txHash": "0xbefc46a1891f7c3295f182b0a2bb7fbe6be3995d31a4e5458c146a8d3b7615ff",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5F91d52695C70137477A6e91cc266bEf13b824ba",
+      "txHash": "0x268c6bf2080446f97c430bf6c004a08149dcd277c950c024a76a0092fea16477",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x71303586aCDCa2b22d83De9110e49F922d90af9c",
+      "txHash": "0x6f98049712a52a8b186f7f55e7e553497f6d72417d0d812e2c0de0c2424ffbcf",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3Fc80aC79DeeBbE79694bcb992F1da3a34C42CcC",
+      "txHash": "0xfbb2d28ae6765637382a7bf767ea2df5a32fc1155d526e90066e0b6916cbe476",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3f0256533a4c4670B7E4b4CBcE990d7497216489",
+      "txHash": "0x97309f560be370084e9278836c20ad7f81b2545e590b92b35804a4e55bb33adf",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x425D7a80B28a7217380B51A55724C8E19955a9d0",
+      "txHash": "0x52c9d818a0024f61e71ffed660323ed23cd0c4d35197a3c86b46f80a211a224f",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "ecb84c7eee21bea7d595930290915e65b24114bb66a1129f3d892fedf9f8f24d": {
+      "address": "0x4C25D943d15d9F689c6593B8922aEC0D3b6d9e74",
+      "txHash": "0x5f5f00412271a964bc7f628e8e822f6e0eb832de3d64969843a9a9bd837696f2",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "tokenOracles",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_address,t_struct(OracleInfo)2641_storage)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:52"
+          },
+          {
+            "label": "wNative",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_address",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:53"
+          },
+          {
+            "label": "wNativeDecimals",
+            "offset": 20,
+            "slot": "102",
+            "type": "t_uint8",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:54"
+          },
+          {
+            "label": "stableUsdTokens",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:55"
+          },
+          {
+            "label": "stableUsdTokenDecimals",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_uint8)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:56"
+          },
+          {
+            "label": "defaultFactoryV2",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_contract(IApeFactory)6073",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:57"
+          },
+          {
+            "label": "defaultFactoryV3",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_contract(IUniswapV3Factory)831",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:58"
+          },
+          {
+            "label": "defaultFactoryAlgebra",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_contract(IAlgebraFactory)5833",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:59"
+          },
+          {
+            "label": "secondsAgo",
+            "offset": 20,
+            "slot": "107",
+            "type": "t_uint24",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:60"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IAlgebraFactory)5833": {
+            "label": "contract IAlgebraFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IApeFactory)6073": {
+            "label": "contract IApeFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IUniswapV3Factory)831": {
+            "label": "contract IUniswapV3Factory",
+            "numberOfBytes": "20"
+          },
+          "t_enum(OracleType)2633": {
+            "label": "enum PriceGetterV2.OracleType",
+            "members": [
+              "NONE",
+              "CHAIN_LINK"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(OracleInfo)2641_storage)": {
+            "label": "mapping(address => struct PriceGetterV2.OracleInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint8)": {
+            "label": "mapping(address => uint8)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleInfo)2641_storage": {
+            "label": "struct PriceGetterV2.OracleInfo",
+            "members": [
+              {
+                "label": "oracleType",
+                "type": "t_enum(OracleType)2633",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "oracleAddress",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "oracleDecimals",
+                "type": "t_uint8",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "f849fa51c5fd8a2f864a0581fd3211c724bc43ff74614bbcbbe98ea7fa1283fe": {
+      "address": "0xB8C30b21A817B993B1c20d005B80ab88Bb55b689",
+      "txHash": "0xf06094c953d05784c4879312c47e15b19400a0f6d4cfea1e9e5ad2aac1c8e046",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "tokenOracles",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_address,t_struct(OracleInfo)2641_storage)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:52"
+          },
+          {
+            "label": "wNative",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_address",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:53"
+          },
+          {
+            "label": "wNativeDecimals",
+            "offset": 20,
+            "slot": "102",
+            "type": "t_uint8",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:54"
+          },
+          {
+            "label": "stableUsdTokens",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:55"
+          },
+          {
+            "label": "stableUsdTokenDecimals",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_uint8)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:56"
+          },
+          {
+            "label": "defaultFactoryV2",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_contract(IApeFactory)6073",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:57"
+          },
+          {
+            "label": "defaultFactoryV3",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_contract(IUniswapV3Factory)831",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:58"
+          },
+          {
+            "label": "defaultFactoryAlgebra",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_contract(IAlgebraFactory)5833",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:59"
+          },
+          {
+            "label": "secondsAgo",
+            "offset": 20,
+            "slot": "107",
+            "type": "t_uint24",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:60"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IAlgebraFactory)5833": {
+            "label": "contract IAlgebraFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IApeFactory)6073": {
+            "label": "contract IApeFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IUniswapV3Factory)831": {
+            "label": "contract IUniswapV3Factory",
+            "numberOfBytes": "20"
+          },
+          "t_enum(OracleType)2633": {
+            "label": "enum PriceGetterV2.OracleType",
+            "members": [
+              "NONE",
+              "CHAIN_LINK"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(OracleInfo)2641_storage)": {
+            "label": "mapping(address => struct PriceGetterV2.OracleInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint8)": {
+            "label": "mapping(address => uint8)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleInfo)2641_storage": {
+            "label": "struct PriceGetterV2.OracleInfo",
+            "members": [
+              {
+                "label": "oracleType",
+                "type": "t_enum(OracleType)2633",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "oracleAddress",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "oracleDecimals",
+                "type": "t_uint8",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "3458b73acb204cc89500f8d6fb059a01fec870b7521ccf61eb7247937b8f3d03": {
+      "address": "0xDa939Fc249BbFCc28a14bE3a5902458aF7088366",
+      "txHash": "0x0b93923a6ec2f9e9dbd259138c4293e91bbd009c0ce60d06d3c5d74b1dc1ea99",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "tokenOracles",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_address,t_struct(OracleInfo)2671_storage)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:52"
+          },
+          {
+            "label": "wNative",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_address",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:53"
+          },
+          {
+            "label": "wNativeDecimals",
+            "offset": 20,
+            "slot": "102",
+            "type": "t_uint8",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:54"
+          },
+          {
+            "label": "stableUsdTokens",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:55"
+          },
+          {
+            "label": "stableUsdTokenDecimals",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_uint8)",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:56"
+          },
+          {
+            "label": "defaultFactoryV2",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_contract(IApeFactory)6304",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:57"
+          },
+          {
+            "label": "defaultFactoryV3",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_contract(IUniswapV3Factory)831",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:58"
+          },
+          {
+            "label": "defaultFactoryAlgebra",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_contract(IAlgebraFactory)6064",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:59"
+          },
+          {
+            "label": "secondsAgo",
+            "offset": 20,
+            "slot": "107",
+            "type": "t_uint24",
+            "contract": "PriceGetterV2",
+            "src": "contracts\\PriceGetterV2.sol:60"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IAlgebraFactory)6064": {
+            "label": "contract IAlgebraFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IApeFactory)6304": {
+            "label": "contract IApeFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IUniswapV3Factory)831": {
+            "label": "contract IUniswapV3Factory",
+            "numberOfBytes": "20"
+          },
+          "t_enum(OracleType)2663": {
+            "label": "enum PriceGetterV2.OracleType",
+            "members": [
+              "NONE",
+              "CHAIN_LINK"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(OracleInfo)2671_storage)": {
+            "label": "mapping(address => struct PriceGetterV2.OracleInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint8)": {
+            "label": "mapping(address => uint8)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleInfo)2671_storage": {
+            "label": "struct PriceGetterV2.OracleInfo",
+            "members": [
+              {
+                "label": "oracleType",
+                "type": "t_enum(OracleType)2663",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "oracleAddress",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "oracleDecimals",
+                "type": "t_uint8",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint24": {
+            "label": "uint24",
+            "numberOfBytes": "3"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}
