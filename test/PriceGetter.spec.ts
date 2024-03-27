@@ -45,14 +45,15 @@ describe('PriceGetter', function () {
   })
 
   it('Should get right native price from custom factory', async function () {
-    const { priceGetter, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
+    const { priceGetter, pcsFactoryV2, pcsFactoryV3, solidlyFactory } = await loadFixture(fixture)
 
     const functionName = 'getNativePriceFromFactory'
-    const wnativePrice = await priceGetter[functionName](Protocol.Both, pcsFactoryV2, pcsFactoryV3)
+    const wnativePrice = await priceGetter[functionName](Protocol.Both, pcsFactoryV2, pcsFactoryV3, solidlyFactory)
     const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [
       Protocol.Both,
       pcsFactoryV2,
       pcsFactoryV3,
+      solidlyFactory,
     ])
     console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
 
@@ -87,9 +88,8 @@ describe('PriceGetter', function () {
 
   it('Should get right token prices with custom factory', async function () {
     //Prices are allowed to be 2% off from coingecko price API
-    const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3, algebraFactory } = await loadFixture(
-      fixture
-    )
+    const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3, algebraFactory, solidlyFactory } =
+      await loadFixture(fixture)
     const tokenAddresses = Array.from(tokens, (x) => x.address)
 
     const functionName = 'getPricesFromFactory'
@@ -98,7 +98,8 @@ describe('PriceGetter', function () {
       Protocol.Both,
       pcsFactoryV2,
       pcsFactoryV3,
-      algebraFactory
+      algebraFactory,
+      solidlyFactory
     )
     const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [
       tokenAddresses,
@@ -106,6 +107,7 @@ describe('PriceGetter', function () {
       pcsFactoryV2,
       pcsFactoryV3,
       algebraFactory,
+      solidlyFactory,
     ])
     console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
 

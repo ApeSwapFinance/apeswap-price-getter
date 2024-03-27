@@ -946,6 +946,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         ISolidlyFactory factorySolidly,
         address token
     ) internal view returns (uint256 price, uint256 tokenTotal) {
+        require(factorySolidly != ISolidlyFactory(address(0)), "Solidly factory not set");
         uint256 nativePrice = getNativePriceFromFactory(
             Protocol.Solidly,
             defaultFactoryV2,
@@ -1247,6 +1248,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         uint8 decimalsA,
         uint8 decimalsB
     ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
+        /// @dev Defaulting to stable == false
         address pairAddress = factorySolidly.getPair(tokenA, tokenB, false);
         if (pairAddress == address(0)) {
             return (0, 0);

@@ -1,4 +1,5 @@
 import { ethers } from 'hardhat'
+import { ADDRESS_ZERO } from '../utils/constants'
 
 export async function deployPriceGetterBSCFixture(_ethers: typeof ethers) {
   const wNative = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
@@ -26,10 +27,21 @@ export async function deployPriceGetterBSCFixture(_ethers: typeof ethers) {
   const pcsFactoryV3 = '0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'
 
   const algebraFactory = '0x306F06C147f064A010530292A1EB6737c3e378e4'
+  // NOTE: Setting to ADDRESS_ZERO because I couldn't find one on BSC
+  const solidlyFactory = ADDRESS_ZERO
 
   const PriceGetter = await ethers.getContractFactory('PriceGetterV2')
   const priceGetter = await PriceGetter.deploy()
-  await priceGetter.initialize(wNative, factoryV2, factoryV3, algebraFactory, stableUsdTokens, oracleTokens, oracles)
+  await priceGetter.initialize(
+    wNative,
+    factoryV2,
+    factoryV3,
+    algebraFactory,
+    solidlyFactory,
+    stableUsdTokens,
+    oracleTokens,
+    oracles
+  )
   const tokens = [
     { address: '0x603c7f932ED1fc6575303D8Fb018fDCBb0f39a95', coingeckoId: 'apeswap-finance' },
     { address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', coingeckoId: 'usd-coin' },
@@ -37,5 +49,5 @@ export async function deployPriceGetterBSCFixture(_ethers: typeof ethers) {
     { address: '0x5774b2fc3e91af89f89141eacf76545e74265982', coingeckoId: 'nfty-token' },
     { address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', coingeckoId: 'bitcoin' },
   ]
-  return { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3, algebraFactory }
+  return { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3, algebraFactory, solidlyFactory }
 }
