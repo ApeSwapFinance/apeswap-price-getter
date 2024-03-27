@@ -87,16 +87,25 @@ describe('PriceGetter', function () {
 
   it('Should get right token prices with custom factory', async function () {
     //Prices are allowed to be 2% off from coingecko price API
-    const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3 } = await loadFixture(fixture)
+    const { priceGetter, tokens, factoryV2, factoryV3, pcsFactoryV2, pcsFactoryV3, algebraFactory } = await loadFixture(
+      fixture
+    )
     const tokenAddresses = Array.from(tokens, (x) => x.address)
 
     const functionName = 'getPricesFromFactory'
-    const tokenPrices = await priceGetter[functionName](tokenAddresses, Protocol.Both, pcsFactoryV2, pcsFactoryV3)
+    const tokenPrices = await priceGetter[functionName](
+      tokenAddresses,
+      Protocol.Both,
+      pcsFactoryV2,
+      pcsFactoryV3,
+      algebraFactory
+    )
     const gasUsage = await estimateReadOperationGas(priceGetter, functionName, [
       tokenAddresses,
       Protocol.Both,
       pcsFactoryV2,
       pcsFactoryV3,
+      algebraFactory,
     ])
     console.log(`Gas usage for ${functionName}:`, gasUsage.toString())
 
