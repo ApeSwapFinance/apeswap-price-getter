@@ -1,3 +1,7 @@
+# Local
+_*
+deployments/*.js
+
 node_modules
 .env
 coverage

@@ -2,7 +2,7 @@ import chalk from 'chalk'
 
 const DEFAULTS = {
   verbose: false,
-  silent: true,
+  silent: false,
 }
 
 export class Logger {
@@ -46,6 +46,15 @@ export class Logger {
       formattedMessage = `${formattedPrefix} ${formattedMessage}`
     }
     console.error(formattedMessage)
+  }
+
+  logHeader(msg: string, emoji: string, color = 'white'): void {
+    this.log(`\n`, '')
+    this.log(
+      `\n========================================\n${msg}\n========================================`,
+      emoji,
+      color
+    )
   }
 }
 

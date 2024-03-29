@@ -6,7 +6,13 @@ import 'hardhat-contract-sizer'
 
 import { task, types } from 'hardhat/config'
 import { TASK_TEST } from 'hardhat/builtin-tasks/task-names'
-import { HardhatRuntimeEnvironment, HttpNetworkUserConfig, NetworkUserConfig, SolcUserConfig } from 'hardhat/types'
+import {
+  HardhatRuntimeEnvironment,
+  HttpNetworkAccountsUserConfig,
+  HttpNetworkUserConfig,
+  NetworkUserConfig,
+  SolcUserConfig,
+} from 'hardhat/types'
 
 import { Task, Verifier, Network } from './hardhat'
 import { getEnv, Logger, logger, testRunner } from './hardhat/utils'
@@ -97,93 +103,93 @@ task(TASK_TEST, '🫶 Test Task')
   .addOptionalParam('blockNumber', 'Optional block number to fork in case of running fork tests.', undefined, types.int)
   .setAction(testRunner)
 
-export const mainnetMnemonic = getEnv('MAINNET_MNEMONIC')
-export const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
+const mainnetMnemonic = getEnv('MAINNET_MNEMONIC')
+const mainnetPrivateKey = getEnv('MAINNET_PRIVATE_KEY')
+const mainnetAccounts: HttpNetworkAccountsUserConfig | undefined = mainnetMnemonic
+  ? { mnemonic: mainnetMnemonic }
+  : mainnetPrivateKey
+  ? [mainnetPrivateKey] // Fallback to private key
+  : undefined
 
-interface NetworkUserConfigExtended extends HttpNetworkUserConfig {
+const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
+const testnetPrivateKey = getEnv('TESTNET_PRIVATE_KEY')
+const testnetAccounts: HttpNetworkAccountsUserConfig | undefined = testnetMnemonic
+  ? { mnemonic: testnetMnemonic }
+  : testnetPrivateKey
+  ? [testnetPrivateKey] // Fallback to private key
+  : undefined
+
+type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
 }
 
-const networkConfig: Record<Network, NetworkUserConfigExtended> = {
+type NetworkUserConfigExtended = HttpNetworkUserConfig & ExtendedNetworkOptions
+
+// Custom type for the hardhat network
+type ExtendedHardhatNetworkConfig = {
+  [K in Network]: K extends 'hardhat' ? HardhatUserConfig & ExtendedNetworkOptions : NetworkUserConfigExtended
+}
+
+const networkConfig: ExtendedHardhatNetworkConfig = {
   mainnet: {
-    url: getEnv('MAINNET_RPC_URL') || '',
+    url: getEnv('MAINNET_RPC_URL') || 'https://rpc.ankr.com/eth',
     getExplorerUrl: (address: string) => `https://etherscan.io/address/${address}`,
     chainId: 1,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: mainnetAccounts,
   },
   goerli: {
     url: getEnv('GOERLI_RPC_URL') || '',
     getExplorerUrl: (address: string) => `https://goerli.etherscan.io/address/${address}`,
     chainId: 5,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   arbitrum: {
-    url: getEnv('ARBITRUM_RPC_URL') || '',
+    url: getEnv('ARBITRUM_RPC_URL') || 'https://arbitrum-one.publicnode.com',
     getExplorerUrl: (address: string) => `https://arbiscan.io/address/${address}`,
     chainId: 42161,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: mainnetAccounts,
   },
   arbitrumGoerli: {
     url: getEnv('ARBITRUM_GOERLI_RPC_URL') || '',
     getExplorerUrl: (address: string) => `https://testnet.arbiscan.io/address/${address}`,
     chainId: 421613,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   bsc: {
-    url: getEnv('BSC_RPC_URL') || 'https://bsc-dataseed1.binance.org',
+    url: getEnv('BSC_RPC_URL') || 'https://binance.llamarpc.com',
     getExplorerUrl: (address: string) => `https://bscscan.com/address/${address}`,
     chainId: 56,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: mainnetAccounts,
   },
   bscTestnet: {
     url: getEnv('BSC_TESTNET_RPC_URL') || 'https://data-seed-prebsc-1-s1.binance.org:8545',
     getExplorerUrl: (address: string) => `https://testnet.bscscan.com/address/${address}`,
     chainId: 97,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   polygon: {
-    url: getEnv('POLYGON_RPC_URL') || 'https://matic-mainnet.chainstacklabs.com',
+    url: getEnv('POLYGON_RPC_URL') || 'https://polygon.llamarpc.com	',
     getExplorerUrl: (address: string) => `https://polygonscan.com/address/${address}`,
     chainId: 137,
-    accounts: {
-      mnemonic: mainnetMnemonic,
-    },
+    accounts: mainnetAccounts,
   },
   polygonTestnet: {
     url: getEnv('POLYGON_TESTNET_RPC_URL') || 'https://rpc-mumbai.maticvigil.com/',
     getExplorerUrl: (address: string) => `https://mumbai.polygonscan.com/address/${address}`,
     chainId: 80001,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   telos: {
     url: getEnv('TELOS_RPC_URL') || 'https://mainnet.telos.net/evm',
     getExplorerUrl: (address: string) => `https://www.teloscan.io/address/${address}`,
     chainId: 40,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   telosTestnet: {
     url: getEnv('TELOS_TESTNET_RPC_URL') || 'https://testnet.telos.net/evm',
     getExplorerUrl: (address: string) => `https://testnet.teloscan.io/address/${address}`,
     chainId: 41,
-    accounts: {
-      mnemonic: testnetMnemonic,
-    },
+    accounts: testnetAccounts,
   },
   // Placeholder for the configuration below.
   hardhat: {
@@ -220,7 +226,8 @@ const config: HardhatUserConfig = {
       gas: 'auto',
       gasPrice: 'auto',
       forking: {
-        url: 'https://rpc.ankr.com/bsc',
+        // url: process.env.FORK_RPC || 'https://bsc.blockpi.network/v1/rpc/public',
+        url: process.env.FORK_RPC || 'https://binance.llamarpc.com',
       },
     },
   },
@@ -254,21 +261,21 @@ const config: HardhatUserConfig = {
     // except: [':ERC20$'], // Array of String matchers used to exclude contracts
     // outputFile: './contract-size.md', // Optional output file to write to
   },
-  // etherscan: {
-  /**
-   * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
-   *  This version breaks the src/task.ts file which hasn't been refactored yet
-   */
-  // apiKey: {
-  //   mainnet: getEnv('ETHERSCAN_API_KEY'),
-  //   optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
-  //   arbitrumOne: getEnv('ARBISCAN_API_KEY'),
-  //   bsc: getEnv('BSCSCAN_API_KEY'),
-  //   bscTestnet: getEnv('BSCSCAN_API_KEY'),
-  //   polygon: getEnv('POLYGONSCAN_API_KEY'),
-  //   polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
-  // },
-  // },
+  etherscan: {
+    /**
+     * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
+     *  This version breaks the src/task.ts file which hasn't been refactored yet
+     */
+    apiKey: {
+      mainnet: getEnv('ETHERSCAN_API_KEY'),
+      // optimisticEthereum: getEnv('OPTIMISTIC_ETHERSCAN_API_KEY'),
+      arbitrumOne: getEnv('ARBISCAN_API_KEY'),
+      bsc: getEnv('BSCSCAN_API_KEY'),
+      // bscTestnet: getEnv('BSCSCAN_API_KEY'),
+      polygon: getEnv('POLYGONSCAN_API_KEY'),
+      // polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
+    },
+  },
 }
 
 const parseApiKey = (network: Network, key?: string): string | undefined => {
@@ -276,6 +283,7 @@ const parseApiKey = (network: Network, key?: string): string | undefined => {
 }
 
 /**
+ * // TODO: This has been deprecated
  * Placeholder configuration for @nomiclabs/hardhat-etherscan to store verification API urls
  */
 const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
