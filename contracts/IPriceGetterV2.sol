@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import "./swap-v2-lib/IApeFactory.sol";
+import "./swap-v2-lib/ISolidlyFactory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "./interfaces/IAlgebraFactory.sol";
 import "./interfaces/IGammaHypervisor.sol";
@@ -15,7 +16,8 @@ interface IPriceGetterV2 {
         V3,
         Algebra,
         Gamma,
-        Steer
+        Steer,
+        Solidly
     }
 
     function getLPPriceV2(address lp) external view returns (uint256 price);
@@ -78,7 +80,8 @@ interface IPriceGetterV2 {
         Protocol protocol,
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
-        IAlgebraFactory factoryAlgebra
+        IAlgebraFactory factoryAlgebra,
+        ISolidlyFactory factorySolidly
     ) external view returns (uint256 price);
 
     function getPriceV2(address token) external view returns (uint256 price);
@@ -105,7 +108,8 @@ interface IPriceGetterV2 {
         Protocol protocol,
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
-        IAlgebraFactory factoryAlgebra
+        IAlgebraFactory factoryAlgebra,
+        ISolidlyFactory factorySolidly
     ) external view returns (uint256 price);
 
     function getPricesFromFactory(
@@ -113,7 +117,8 @@ interface IPriceGetterV2 {
         Protocol protocol,
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
-        IAlgebraFactory factoryAlgebra
+        IAlgebraFactory factoryAlgebra,
+        ISolidlyFactory factorySolidly
     ) external view returns (uint256[] memory prices);
 
     function getNativePrice(Protocol protocol) external view returns (uint256 price);
@@ -121,6 +126,7 @@ interface IPriceGetterV2 {
     function getNativePriceFromFactory(
         Protocol protocol,
         IApeFactory factoryV2,
-        IUniswapV3Factory factoryV3
+        IUniswapV3Factory factoryV3,
+        ISolidlyFactory factorySolidly
     ) external view returns (uint256 price);
 }

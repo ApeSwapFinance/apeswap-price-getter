@@ -4,18 +4,29 @@ import getNetworkConfig from '../../deploy-config'
 import { DeployManager } from './DeployManager'
 
 async function main() {
-  const { wNative, factoryV2, factoryV3, factoryAlgebra, stableUsdTokens, oracleTokens, oracles } = getNetworkConfig(
-    hre.network.name
-  )
+  const { wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles } =
+    getNetworkConfig(hre.network.name)
   const deployManager = new DeployManager()
 
+  console.log(wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles)
   const contractName = 'PriceGetterExtended'
   const PriceGetterExtended = await ethers.getContractFactory(contractName)
   const priceGetterExtended = await deployManager.deployContractFromFactory(
     PriceGetterExtended,
-    [wNative, factoryV2, factoryV3, factoryAlgebra, stableUsdTokens, oracleTokens, oracles],
+    [],
     contractName, // Pass in contract name to log contract
-    true
+    false
+  )
+
+  priceGetterExtended.initialize(
+    wNative,
+    factoryV2,
+    factoryV3,
+    factoryAlgebra,
+    factorySolidly,
+    stableUsdTokens,
+    oracleTokens,
+    oracles
   )
 
   const output = {
@@ -24,6 +35,8 @@ async function main() {
       wNative,
       factoryV2,
       factoryV3,
+      factoryAlgebra,
+      factorySolidly,
       stableUsdTokens,
       oracleTokens,
       oracles,
