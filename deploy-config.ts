@@ -11,6 +11,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
       factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
       factorySolidly: '0xAFD89d21BdB66d00817d4153E055830B1c2B3970',
+      proxyAdminContract: '',
       stableUsdTokens: [
         '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
         '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
@@ -39,6 +40,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
       factoryAlgebra: '0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28', // Algebra Factory
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      proxyAdminContract: '0x4efe59ab13a7d6d919afed8a688ef6a2934fe621',
       stableUsdTokens: [
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
@@ -66,6 +68,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
       factoryAlgebra: '0x0000000000000000000000000000000000000000', // Algebra Factory
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      proxyAdminContract: '',
       stableUsdTokens: [
         '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
         '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
@@ -93,6 +96,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
       factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      proxyAdminContract: '',
       stableUsdTokens: [
         '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
         '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC

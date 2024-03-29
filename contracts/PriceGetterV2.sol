@@ -22,6 +22,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 
 /**
+VERSION: 2.2
+
 DISCLAIMER: 
 This smart contract is provided for user interface purposes only and is not intended to be used for smart contract logic. 
 Any attempt to rely on this code for the execution of a smart contract may result in unexpected behavior, 

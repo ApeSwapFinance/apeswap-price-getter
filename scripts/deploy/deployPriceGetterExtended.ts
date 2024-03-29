@@ -1,24 +1,11 @@
-import { ethers, upgrades } from 'hardhat'
-import hre from 'hardhat'
+import { ethers, network, upgrades } from 'hardhat'
 import getNetworkConfig from '../../deploy-config'
 import { DeployManager } from './DeployManager'
+import { PriceGetterExtended__factory } from '../../typechain-types'
 
 async function main() {
-  const { wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles } =
-    getNetworkConfig(hre.network.name)
-  const deployManager = new DeployManager()
-
-  console.log(wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles)
-  const contractName = 'PriceGetterExtended'
-  const PriceGetterExtended = await ethers.getContractFactory(contractName)
-  const priceGetterExtended = await deployManager.deployContractFromFactory(
-    PriceGetterExtended,
-    [],
-    contractName, // Pass in contract name to log contract
-    false
-  )
-
-  priceGetterExtended.initialize(
+  const currentNetwork = network.name
+  const {
     wNative,
     factoryV2,
     factoryV3,
@@ -26,11 +13,30 @@ async function main() {
     factorySolidly,
     stableUsdTokens,
     oracleTokens,
-    oracles
-  )
+    oracles,
+    proxyAdminContract,
+  } = getNetworkConfig(currentNetwork)
+
+  const accounts = await ethers.getSigners()
+  // Extract config for the network
+  const [deployerAccount, hardhatAdminAccount, hardhatProxyAdminOwnerAddress] = accounts
+  // Setup deploy manager
+  const deployManager = await DeployManager.create({ signer: deployerAccount })
+
+  console.log(wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles)
+
+  const { implementationThroughProxy: PriceGetterExtended, implementation: PriceGetterExtended_Implementation } =
+    await deployManager.deployUpgradeableContract<PriceGetterExtended__factory>(
+      'PriceGetterExtended',
+      [wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles],
+      {
+        proxyAdminAddress: proxyAdminContract,
+      }
+    )
 
   const output = {
-    priceGetterExtended: priceGetterExtended.address,
+    priceGetterExtended: PriceGetterExtended.address,
+    priceGetterExtendedImplementation: PriceGetterExtended_Implementation.address,
     config: {
       wNative,
       factoryV2,
