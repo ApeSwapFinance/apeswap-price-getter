@@ -156,7 +156,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     accounts: testnetAccounts,
   },
   bsc: {
-    url: getEnv('BSC_RPC_URL') || 'https://bsc-dataseed1.binance.org',
+    url: getEnv('BSC_RPC_URL') || 'https://binance.llamarpc.com',
     getExplorerUrl: (address: string) => `https://bscscan.com/address/${address}`,
     chainId: 56,
     accounts: mainnetAccounts,

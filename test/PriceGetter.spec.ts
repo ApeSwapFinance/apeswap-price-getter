@@ -121,5 +121,5 @@ describe('PriceGetter', function () {
         expect(tokenPrices[i]).to.be.within(coingeckoPriceBN.mul(98).div(100), coingeckoPriceBN.mul(102).div(100))
       }
     }
-  })
+  }).timeout(100000)
 })
