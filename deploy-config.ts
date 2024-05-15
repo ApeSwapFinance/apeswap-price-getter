@@ -116,6 +116,34 @@ function getNetworkConfig(network: any) {
         '0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7', // USDT/USD
       ],
     }
+  } else if (['linea'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+      factoryV2: '0x9E4Fc4a5A0769ba74088856C229c4a1Db2Ea5A9e', //SpartaDex (only v2 I could find)
+      factoryAlgebra: '0x622b2c98123D303ae067DB4925CD6282B3A08D0F',
+      factoryV3: '0xF97a3a7187A7636F882463f6693aB82d5Be5baD4', //Nile exchange
+      factorySolidly: '0xBc7695Fd00E3b32D08124b7a4287493aEE99f9ee', //Lynex
+      proxyAdminContract: '0x7AD6115A646D225A9486DC557f17021935b99147',
+      stableUsdTokens: [
+        '0xA219439258ca9da29E9Cc4cE5596924745e12B93', //USDT
+        '0x176211869cA2b568f2A7D4EE941E073a821EE1ff', //USDC
+        '0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5', //DAI
+      ],
+      oracleTokens: [
+        '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        '0xA219439258ca9da29E9Cc4cE5596924745e12B93', //USDT
+        '0x176211869cA2b568f2A7D4EE941E073a821EE1ff', //USDC
+        '0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5', //DAI
+      ],
+      // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain
+      oracles: [
+        '0x3c6Cd9Cc7c7a4c2Cf5a82734CD249D7D593354dA',
+        '0xefCA2bbe0EdD0E22b2e0d2F8248E99F4bEf4A7dB',
+        '0xAADAa473C1bDF7317ec07c915680Af29DeBfdCb5',
+        '0x5133D67c38AFbdd02997c14Abd8d83676B4e309A',
+      ],
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

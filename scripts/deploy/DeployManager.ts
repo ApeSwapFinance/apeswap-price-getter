@@ -585,7 +585,8 @@ export class DeployManager {
     }
 
     const currentDate = new Date()
-    const currentDateString = getDateMinuteString(currentDate) // e.g. 20230330T12:50
+    let currentDateString = getDateMinuteString(currentDate) // e.g. 20230330T12:50
+    currentDateString = currentDateString.replace(/:/g, '');
     const filePath = getFilePath(currentDateString)
     try {
       fs.writeFileSync(filePath, `module.exports = ${deploymentSummaryString};`)

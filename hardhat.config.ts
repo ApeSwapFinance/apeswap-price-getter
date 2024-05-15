@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from 'hardhat/config'
-import '@nomicfoundation/hardhat-toolbox'
+// import '@nomicfoundation/hardhat-toolbox'
 import 'solidity-coverage'
 import 'hardhat-docgen'
 import 'hardhat-contract-sizer'
@@ -18,6 +18,7 @@ import { Task, Verifier, Network } from './hardhat'
 import { getEnv, Logger, logger, testRunner } from './hardhat/utils'
 import solhintConfig from './solhint.config'
 import '@openzeppelin/hardhat-upgrades'
+import '@nomicfoundation/hardhat-verify'
 
 /**
  * Deploy contracts based on a directory ID in tasks/
@@ -30,7 +31,7 @@ task('deploy', '🫶 Run deployment task')
   .addOptionalParam('key', 'Etherscan API key to verify contracts')
   .setAction(
     async (args: { id: string; force?: boolean; key?: string; verbose?: boolean }, hre: HardhatRuntimeEnvironment) => {
-      Logger.setDefaults(false, args.verbose || false)
+      // Logger.setDefaults(false, args.verbose || false)
       const key = parseApiKey(hre.network.name as Network, args.key)
       const verifier = key ? new Verifier(hre.network, key) : undefined
       await Task.fromHRE(args.id, hre, verifier).run(args)
@@ -61,7 +62,7 @@ task('verify-contract', '🫶 Run verification for a given contract')
       },
       hre: HardhatRuntimeEnvironment
     ) => {
-      Logger.setDefaults(false, args.verbose || false)
+      // Logger.setDefaults(false, args.verbose || false)
       const key = parseApiKey(hre.network.name as Network, args.key)
       const verifier = key ? new Verifier(hre.network, key) : undefined
 
@@ -70,7 +71,7 @@ task('verify-contract', '🫶 Run verification for a given contract')
   )
 
 task('print-tasks', '🫶 Prints available tasks in tasks/ directory').setAction(async (args: { verbose?: boolean }) => {
-  Logger.setDefaults(false, args.verbose || false)
+  // Logger.setDefaults(false, args.verbose || false)
   logger.log(
     `Use the following tasks in a variety of ways \nnpx hardhat deploy --id <task-id> --network <network-name> \nnpx hardhat verify-contract --id <task-id> --network <network-name> --name <contract-name> \n`,
     `🫶`
@@ -108,16 +109,16 @@ const mainnetPrivateKey = getEnv('MAINNET_PRIVATE_KEY')
 const mainnetAccounts: HttpNetworkAccountsUserConfig | undefined = mainnetMnemonic
   ? { mnemonic: mainnetMnemonic }
   : mainnetPrivateKey
-  ? [mainnetPrivateKey] // Fallback to private key
-  : undefined
+    ? [mainnetPrivateKey] // Fallback to private key
+    : undefined
 
 const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
 const testnetPrivateKey = getEnv('TESTNET_PRIVATE_KEY')
 const testnetAccounts: HttpNetworkAccountsUserConfig | undefined = testnetMnemonic
   ? { mnemonic: testnetMnemonic }
   : testnetPrivateKey
-  ? [testnetPrivateKey] // Fallback to private key
-  : undefined
+    ? [testnetPrivateKey] // Fallback to private key
+    : undefined
 
 type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
@@ -165,6 +166,18 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     url: getEnv('BSC_TESTNET_RPC_URL') || 'https://data-seed-prebsc-1-s1.binance.org:8545',
     getExplorerUrl: (address: string) => `https://testnet.bscscan.com/address/${address}`,
     chainId: 97,
+    accounts: testnetAccounts,
+  },
+  linea: {
+    url: getEnv('LINEA_RPC_URL') || 'https://rpc.linea.build',
+    getExplorerUrl: (address: string) => `https://lineascan.build/address/${address}`,
+    chainId: 59144,
+    accounts: mainnetAccounts,
+  },
+  lineaTestnet: {
+    url: getEnv('LINEA_TESTNET_RPC_URL') || 'https://rpc.goerli.linea.build',
+    getExplorerUrl: (address: string) => `https://goerli.lineascan.build/address/${address}`,
+    chainId: 59140,
     accounts: testnetAccounts,
   },
   polygon: {
@@ -231,26 +244,19 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  gasReporter: {
-    // More options can be found here:
-    // https://www.npmjs.com/package/hardhat-gas-reporter
-    enabled: getEnv('REPORT_GAS') ? true : false,
-    currency: 'USD',
-    excludeContracts: [],
-  },
   docgen: {
     path: './docs',
     clear: true,
     // TODO: Enable for each compile (disabled for template to avoid unnecessary generation)
     runOnCompile: false,
   },
-  typechain: {
-    // outDir: 'src/types', // defaults to './typechain-types/'
-    target: 'ethers-v5',
-    // externalArtifacts: [], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
-    alwaysGenerateOverloads: false, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
-    dontOverrideCompile: false, // defaults to false
-  },
+  // typechain: {
+  //   // outDir: 'src/types', // defaults to './typechain-types/'
+  //   target: 'ethers-v5',
+  //   // externalArtifacts: [], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
+  //   alwaysGenerateOverloads: false, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
+  //   dontOverrideCompile: false, // defaults to false
+  // },
   contractSizer: {
     // https://github.com/ItsNickBarry/hardhat-contract-sizer#usage
     alphaSort: false, // whether to sort results table alphabetically (default sort is by contract size)
@@ -274,7 +280,20 @@ const config: HardhatUserConfig = {
       // bscTestnet: getEnv('BSCSCAN_API_KEY'),
       polygon: getEnv('POLYGONSCAN_API_KEY'),
       // polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
+      linea: getEnv('LINEASCAN_API_KEY'),
+      lineaTestnet: getEnv('LINEASCAN_API_KEY'),
     },
+    // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
+    customChains: [
+      {
+        network: "linea",
+        chainId: 59144,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build/"
+        }
+      }
+    ]
   },
 }
 
@@ -295,6 +314,8 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       arbitrum: getEnv('ARBITRUM_API_KEY'),
       arbitrumGoerli: getEnv('ARBITRUM_API_KEY'),
       bsc: getEnv('BSCSCAN_API_KEY'),
+      linea: getEnv("LINEASCAN_API_KEY"),
+      lineaTestnet: getEnv("LINEASCAN_API_KEY"),
       bscTestnet: getEnv('BSCSCAN_API_KEY'),
       polygon: getEnv('POLYGONSCAN_API_KEY'),
       polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
