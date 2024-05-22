@@ -7,6 +7,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+      nativeLiquidityThreshold: "100000000000000000", //0.1
       factoryV2: '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6',
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
       factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
@@ -35,6 +36,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+      nativeLiquidityThreshold: "100" + "000000000000000000",
       // factoryV2: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32', // Polygon Quicskwap factory
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284', // Polygon ApeSwap V2 Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
@@ -43,19 +45,22 @@ function getNetworkConfig(network: any) {
       proxyAdminContract: '0x4efe59ab13a7d6d919afed8a688ef6a2934fe621',
       stableUsdTokens: [
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
-        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
+        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC.e
+        '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359', // USDC
         '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT
       ],
       oracleTokens: [
         '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270', // WMATIC
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
-        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
+        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC.e
+        '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359', // USDC
         '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT
       ],
       // https://docs.chain.link/data-feeds/price-feeds/addresses?network=polygon
       oracles: [
         '0xAB594600376Ec9fD91F8e885dADF0CE036862dE0', // MATIC/USD
         '0x4746DeC9e833A82EC7C2C1356372CcF2cfcD2F3D', // DAI/USD
+        '0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7', // USDC.e/USD
         '0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7', // USDC/USD
         '0x0A6513e40db6EB1b165753AD52E80663aeA50545', // USDT/USD
       ],
@@ -64,6 +69,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+      nativeLiquidityThreshold: "2000000000000000", //0.002
       factoryV2: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // UniSwap Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
       factoryAlgebra: '0x0000000000000000000000000000000000000000', // Algebra Factory
@@ -92,6 +98,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+      nativeLiquidityThreshold: "2000000000000000", //0.002
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284',
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
       factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
@@ -120,6 +127,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+      nativeLiquidityThreshold: "2000000000000000", //0.002
       factoryV2: '0x9E4Fc4a5A0769ba74088856C229c4a1Db2Ea5A9e', //SpartaDex (only v2 I could find)
       factoryAlgebra: '0x622b2c98123D303ae067DB4925CD6282B3A08D0F',
       factoryV3: '0xF97a3a7187A7636F882463f6693aB82d5Be5baD4', //Nile exchange
@@ -148,6 +156,7 @@ function getNetworkConfig(network: any) {
     console.log(`Deploying with ${network} config.`)
     return {
       wNative: '',
+      nativeLiquidityThreshold: "",
       factoryV2: '',
       factoryV3: '',
       factoryAlgebra: '',

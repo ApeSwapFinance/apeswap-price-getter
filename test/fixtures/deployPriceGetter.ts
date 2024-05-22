@@ -3,6 +3,7 @@ import { ADDRESS_ZERO } from '../utils/constants'
 
 export async function deployPriceGetterBSCFixture(_ethers: typeof ethers) {
   const wNative = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
+  const nativeLiquidityThreshold = "100000000000000000"
   const stableUsdTokens: string[] = [
     '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
     '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
@@ -34,6 +35,7 @@ export async function deployPriceGetterBSCFixture(_ethers: typeof ethers) {
   const priceGetter = await PriceGetter.deploy()
   await priceGetter.initialize(
     wNative,
+    nativeLiquidityThreshold,
     factoryV2,
     factoryV3,
     algebraFactory,

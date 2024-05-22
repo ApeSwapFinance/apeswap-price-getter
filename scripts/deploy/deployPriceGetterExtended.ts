@@ -8,6 +8,7 @@ async function main() {
   const {
     wNative,
     factoryV2,
+    nativeLiquidityThreshold,
     factoryV3,
     factoryAlgebra,
     factorySolidly,
@@ -23,12 +24,12 @@ async function main() {
   // Setup deploy manager
   const deployManager = await DeployManager.create({ signer: deployerAccount })
 
-  console.log(wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles)
+  console.log(wNative, nativeLiquidityThreshold, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles)
 
   const { implementationThroughProxy: PriceGetterExtended, implementation: PriceGetterExtended_Implementation } =
     await deployManager.deployUpgradeableContract<PriceGetterExtended__factory>(
       'PriceGetterExtended',
-      [wNative, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles],
+      [wNative, nativeLiquidityThreshold, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles],
       {
         proxyAdminAddress: proxyAdminContract,
       }

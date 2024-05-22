@@ -239,8 +239,8 @@ export class DeployManager {
         const currentGasPrice = gasPriceOverride
           ? BigNumber.from(gasPriceOverride)
           : this.gasPriceOverride
-          ? this.gasPriceOverride
-          : await (await this.getSigner()).getGasPrice()
+            ? this.gasPriceOverride
+            : await (await this.getSigner()).getGasPrice()
         const increasedGasPrice = currentGasPrice.mul(110).div(100) // Increase by 10%
         const estimatedGas = await ethers.provider.estimateGas(contractFactory.getDeployTransaction(...params))
         const ethCost = ethers.utils.formatEther(increasedGasPrice.mul(estimatedGas))

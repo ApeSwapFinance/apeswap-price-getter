@@ -62,6 +62,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     IAlgebraFactory public defaultFactoryAlgebra;
     ISolidlyFactory public defaultFactorySolidly;
     uint24 public secondsAgo;
+    uint256 public nativeLiquidityThreshold;
 
     /**
      * @dev This contract constructor takes in several parameters which includes the wrapped native token address,
@@ -77,6 +78,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
      */
     function initialize(
         address _wNative,
+        uint256 _nativeLiquidityThreshold,
         IApeFactory _defaultFactoryV2,
         IUniswapV3Factory _defaultFactoryV3,
         IAlgebraFactory _defaultFactoryAlgebra,
@@ -87,6 +89,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     ) public initializer {
         __Ownable_init();
         secondsAgo = 0;
+        nativeLiquidityThreshold = _nativeLiquidityThreshold;
         // Check if the lengths of the oracleTokens and oracles arrays match
         require(_oracleTokens.length == _oracles.length, "Oracles length mismatch");
 
@@ -133,6 +136,10 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
      */
     function setTokenOracle(address token, address oracleAddress, OracleType oracleType) public onlyOwner {
         _setTokenOracle(token, oracleAddress, oracleType);
+    }
+
+    function setNativeLiquidityThreshold(uint256 _nativeLiquidityThreshold) public onlyOwner {
+        nativeLiquidityThreshold = _nativeLiquidityThreshold;
     }
 
     /**
@@ -1042,8 +1049,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             if (tempPrice > 0) {
                 address pair = factoryV3.getPool(token, wNative, fee);
                 uint256 balance = IERC20(token).balanceOf(pair);
-                totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
-                totalBalance += balance;
+                uint256 wNativeBalance = IERC20(wNative).balanceOf(pair);
+                if (wNativeBalance > nativeLiquidityThreshold) {
+                    totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
+                    totalBalance += balance;
+                }
             }
 
             for (uint256 i = 0; i < stableUsdTokens.length; i++) {
@@ -1104,8 +1114,11 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         if (tempPrice > 0) {
             address pair = factoryAlgebra.poolByPair(token, wNative);
             uint256 balance = IERC20(token).balanceOf(pair);
-            totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
-            totalBalance += balance;
+            uint256 wNativeBalance = IERC20(wNative).balanceOf(pair);
+            if (wNativeBalance > nativeLiquidityThreshold) {
+                totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
+                totalBalance += balance;
+            }
         }
 
         for (uint256 i = 0; i < stableUsdTokens.length; i++) {
