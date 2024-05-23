@@ -12,6 +12,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
       factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
       factorySolidly: '0xAFD89d21BdB66d00817d4153E055830B1c2B3970',
+      factoryXFAI: '0x0000000000000000000000000000000000000000',
       proxyAdminContract: '',
       stableUsdTokens: [
         '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
@@ -42,6 +43,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
       factoryAlgebra: '0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28', // Algebra Factory
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      factoryXFAI: '0x0000000000000000000000000000000000000000',
       proxyAdminContract: '0x4efe59ab13a7d6d919afed8a688ef6a2934fe621',
       stableUsdTokens: [
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
@@ -74,6 +76,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
       factoryAlgebra: '0x0000000000000000000000000000000000000000', // Algebra Factory
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      factoryXFAI: '0x0000000000000000000000000000000000000000',
       proxyAdminContract: '',
       stableUsdTokens: [
         '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
@@ -103,6 +106,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
       factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
       factorySolidly: '0x0000000000000000000000000000000000000000',
+      factoryXFAI: '0x0000000000000000000000000000000000000000',
       proxyAdminContract: '',
       stableUsdTokens: [
         '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
@@ -132,6 +136,7 @@ function getNetworkConfig(network: any) {
       factoryAlgebra: '0x622b2c98123D303ae067DB4925CD6282B3A08D0F',
       factoryV3: '0xF97a3a7187A7636F882463f6693aB82d5Be5baD4', //Nile exchange
       factorySolidly: '0xBc7695Fd00E3b32D08124b7a4287493aEE99f9ee', //Lynex
+      factoryXFAI: '0xa5136eAd459F0E61C99Cec70fe8F5C24cF3ecA26', //XFAI
       proxyAdminContract: '0x7AD6115A646D225A9486DC557f17021935b99147',
       stableUsdTokens: [
         '0xA219439258ca9da29E9Cc4cE5596924745e12B93', //USDT
@@ -161,6 +166,7 @@ function getNetworkConfig(network: any) {
       factoryV3: '',
       factoryAlgebra: '',
       factorySolidly: '',
+      factoryXFAI: '',
       stableUsdTokens: [],
       oracleTokens: [],
       oracles: [],

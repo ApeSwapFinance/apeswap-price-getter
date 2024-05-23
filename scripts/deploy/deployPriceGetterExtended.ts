@@ -12,6 +12,7 @@ async function main() {
     factoryV3,
     factoryAlgebra,
     factorySolidly,
+    factoryXFAI,
     stableUsdTokens,
     oracleTokens,
     oracles,
@@ -29,7 +30,7 @@ async function main() {
   const { implementationThroughProxy: PriceGetterExtended, implementation: PriceGetterExtended_Implementation } =
     await deployManager.deployUpgradeableContract<PriceGetterExtended__factory>(
       'PriceGetterExtended',
-      [wNative, nativeLiquidityThreshold, factoryV2, factoryV3, factoryAlgebra, factorySolidly, stableUsdTokens, oracleTokens, oracles],
+      [wNative, nativeLiquidityThreshold, factoryV2, factoryV3, factoryAlgebra, factorySolidly, factoryXFAI, stableUsdTokens, oracleTokens, oracles],
       {
         proxyAdminAddress: proxyAdminContract,
       }

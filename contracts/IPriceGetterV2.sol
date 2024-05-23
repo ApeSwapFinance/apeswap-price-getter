@@ -7,6 +7,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "./interfaces/IAlgebraFactory.sol";
 import "./interfaces/IGammaHypervisor.sol";
 import "./interfaces/ISteerVault.sol";
+import "./interfaces/IXFAIFactory.sol";
 
 interface IPriceGetterV2 {
     enum Protocol {
@@ -17,7 +18,8 @@ interface IPriceGetterV2 {
         Algebra,
         Gamma,
         Steer,
-        Solidly
+        Solidly,
+        XFAI
     }
 
     function getLPPriceV2(address lp) external view returns (uint256 price);
@@ -30,6 +32,17 @@ interface IPriceGetterV2 {
         IApeFactory factoryV2,
         address[] calldata tokens
     ) external view returns (uint256[] memory prices);
+
+    function getLPPriceXFAI(address lp) external view returns (uint256 price);
+
+    // function getLPPricesXFAI(address[] calldata tokens) external view returns (uint256[] memory prices);
+
+    function getLPPriceXFAIFromFactory(IXFAIFactory factoryXFAI, address lp) external view returns (uint256 price);
+
+    // function getLPPricesXFAIFromFactory(
+    //     IXFAIFactory factoryXFAI,
+    //     address[] calldata tokens
+    // ) external view returns (uint256[] memory prices);
 
     function getLPPriceV3(address token0, address token1, uint24 fee) external view returns (uint256 price);
 
@@ -69,11 +82,11 @@ interface IPriceGetterV2 {
         Hypervisor lp
     ) external view returns (uint256 price);
 
-    function getLPPriceSteerFromFactory(
-        IUniswapV3Factory factoryV3,
-        IApeFactory factoryV2,
-        ISteerVault lp
-    ) external view returns (uint256 price);
+    // function getLPPriceSteerFromFactory(
+    //     IUniswapV3Factory factoryV3,
+    //     IApeFactory factoryV2,
+    //     ISteerVault lp
+    // ) external view returns (uint256 price);
 
     function getLPPriceFromFactory(
         address token,
@@ -87,6 +100,10 @@ interface IPriceGetterV2 {
     function getPriceV2(address token) external view returns (uint256 price);
 
     function getPriceV2FromFactory(IApeFactory factoryV2, address token) external view returns (uint256 price);
+
+    function getPriceXFAI(address token) external view returns (uint256 price);
+
+    function getPriceXFAIFromFactory(IXFAIFactory factoryXFAI, address token) external view returns (uint256 price);
 
     function getPriceV3(address token) external view returns (uint256 price);
 
@@ -109,7 +126,8 @@ interface IPriceGetterV2 {
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
         IAlgebraFactory factoryAlgebra,
-        ISolidlyFactory factorySolidly
+        ISolidlyFactory factorySolidly,
+        IXFAIFactory factoryXFAI
     ) external view returns (uint256 price);
 
     function getPricesFromFactory(
@@ -118,7 +136,8 @@ interface IPriceGetterV2 {
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
         IAlgebraFactory factoryAlgebra,
-        ISolidlyFactory factorySolidly
+        ISolidlyFactory factorySolidly,
+        IXFAIFactory factoryXFAI
     ) external view returns (uint256[] memory prices);
 
     function getNativePrice(Protocol protocol) external view returns (uint256 price);
