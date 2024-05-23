@@ -9,6 +9,9 @@ import "./chainlink/ChainlinkOracle.sol";
 import "./IPriceGetterV2.sol";
 import "./interfaces/IUniswapV3PoolStateSlot0.sol";
 import "./interfaces/IAlgebraPool.sol";
+import "./interfaces/IXFAIFactory.sol";
+import "./interfaces/IXFAIPool.sol";
+import "./lib/UtilityLibrary.sol";
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
@@ -22,7 +25,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 
 /**
-VERSION: 2.2
+VERSION: 2.3
 
 DISCLAIMER: 
 This smart contract is provided for user interface purposes only and is not intended to be used for smart contract logic. 
@@ -61,6 +64,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     IUniswapV3Factory public defaultFactoryV3;
     IAlgebraFactory public defaultFactoryAlgebra;
     ISolidlyFactory public defaultFactorySolidly;
+    IXFAIFactory public defaultFactoryXFAI;
     uint24 public secondsAgo;
     uint256 public nativeLiquidityThreshold;
 
@@ -83,6 +87,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         IUniswapV3Factory _defaultFactoryV3,
         IAlgebraFactory _defaultFactoryAlgebra,
         ISolidlyFactory _defaultFactorySolidly,
+        IXFAIFactory _defaultFactoryXFAI,
         address[] memory _stableUsdTokens,
         address[] memory _oracleTokens,
         address[] memory _oracles
@@ -91,7 +96,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         secondsAgo = 0;
         nativeLiquidityThreshold = _nativeLiquidityThreshold;
         // Check if the lengths of the oracleTokens and oracles arrays match
-        require(_oracleTokens.length == _oracles.length, "Oracles length mismatch");
+        require(_oracleTokens.length == _oracles.length, "Oracle length mismatch");
 
         // Loop through the oracleTokens array and set the oracle address for each oracle token using the _setTokenOracle() internal helper function
         for (uint256 i = 0; i < _oracleTokens.length; i++) {
@@ -104,16 +109,31 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
 
         // Set the wrapped native token (wNative) address
         wNative = _wNative;
-        wNativeDecimals = _getTokenDecimals(wNative);
+        wNativeDecimals = UtilityLibrary._getTokenDecimals(wNative);
 
         // Set the factory addresses
         defaultFactoryV2 = _defaultFactoryV2;
         defaultFactoryV3 = _defaultFactoryV3;
         defaultFactoryAlgebra = _defaultFactoryAlgebra;
         defaultFactorySolidly = _defaultFactorySolidly;
+        defaultFactoryXFAI = _defaultFactoryXFAI;
     }
 
     /** SETTERS */
+
+    function setDefaultFactory(Protocol _protocol, address _factory) public onlyOwner {
+        if (_protocol == Protocol.V2) {
+            defaultFactoryV2 = IApeFactory(_factory);
+        } else if (_protocol == Protocol.V3) {
+            defaultFactoryV3 = IUniswapV3Factory(_factory);
+        } else if (_protocol == Protocol.Algebra) {
+            defaultFactoryAlgebra = IAlgebraFactory(_factory);
+        } else if (_protocol == Protocol.Solidly) {
+            defaultFactorySolidly = ISolidlyFactory(_factory);
+        } else if (_protocol == Protocol.XFAI) {
+            defaultFactoryXFAI = IXFAIFactory(_factory);
+        }
+    }
 
     /**
      * @dev Adds new stable USD tokens to the list of supported stable USD tokens.
@@ -123,8 +143,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         for (uint256 i = 0; i < newStableUsdTokens.length; i++) {
             address stableUsdToken = newStableUsdTokens[i];
             stableUsdTokens.push(newStableUsdTokens[i]);
-            require(stableUsdTokenDecimals[stableUsdToken] == 0, "PriceGetter: Stable token already added");
-            stableUsdTokenDecimals[stableUsdToken] = _getTokenDecimals(stableUsdToken);
+            require(stableUsdTokenDecimals[stableUsdToken] == 0, "PriceGetter: token already added");
+            stableUsdTokenDecimals[stableUsdToken] = UtilityLibrary._getTokenDecimals(stableUsdToken);
         }
     }
 
@@ -192,14 +212,48 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             //price0*reserve0+price1*reserve1
             (uint256 token0Price, ) = _getPriceV2(factoryV2, token0);
             (uint256 token1Price, ) = _getPriceV2(factoryV2, token1);
-            reserve0 = _normalizeToken112(reserve0, token0);
-            reserve1 = _normalizeToken112(reserve1, token1);
+            reserve0 = UtilityLibrary._normalizeToken112(reserve0, token0);
+            reserve1 = UtilityLibrary._normalizeToken112(reserve1, token1);
             uint256 totalValue = (token0Price * uint256(reserve0)) + (token1Price * uint256(reserve1));
 
             return totalValue / totalSupply;
         } catch {
             /// @dev If the pair is not a valid LP, return the price of the token
             (uint256 lpPrice, ) = _getPriceV2(factoryV2, lp);
+            return lpPrice;
+        }
+    }
+
+    /**
+     * @dev Returns the price of a liquidity pool
+     * @param lp The address of the LP token contract.
+     * @return price The current price of the LP token.
+     */
+    function getLPPriceXFAI(address lp) public view override returns (uint256 price) {
+        return getLPPriceXFAIFromFactory(defaultFactoryXFAI, lp);
+    }
+
+    function getLPPriceXFAIFromFactory(
+        IXFAIFactory factoryXFAI,
+        address lp
+    ) public view override returns (uint256 price) {
+        //if not a LP, handle as a standard token
+        try IApePair(lp).getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
+            address token0 = IApePair(lp).token0();
+            address token1 = IApePair(lp).token1();
+            uint256 totalSupply = IApePair(lp).totalSupply();
+
+            //price0*reserve0+price1*reserve1
+            (uint256 token0Price, ) = _getPriceXFAI(factoryXFAI, token0);
+            (uint256 token1Price, ) = _getPriceXFAI(factoryXFAI, token1);
+            reserve0 = UtilityLibrary._normalizeToken112(reserve0, token0);
+            reserve1 = UtilityLibrary._normalizeToken112(reserve1, token1);
+            uint256 totalValue = (token0Price * uint256(reserve0)) + (token1Price * uint256(reserve1));
+
+            return totalValue / totalSupply;
+        } catch {
+            /// @dev If the pair is not a valid LP, return the price of the token
+            (uint256 lpPrice, ) = _getPriceXFAI(factoryXFAI, lp);
             return lpPrice;
         }
     }
@@ -226,8 +280,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             //price0*reserve0+price1*reserve1
             (uint256 token0Price, ) = _getPriceSolidly(factorySolidly, token0);
             (uint256 token1Price, ) = _getPriceSolidly(factorySolidly, token1);
-            reserve0 = _normalizeToken112(reserve0, token0);
-            reserve1 = _normalizeToken112(reserve1, token1);
+            reserve0 = UtilityLibrary._normalizeToken112(reserve0, token0);
+            reserve1 = UtilityLibrary._normalizeToken112(reserve1, token1);
             uint256 totalValue = (token0Price * uint256(reserve0)) + (token1Price * uint256(reserve1));
 
             return totalValue / totalSupply;
@@ -268,35 +322,65 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         }
     }
 
-    /**
-     * @dev Returns the prices of multiple LP tokens using the getLPPriceV2 function.
-     * @param tokens An array of LP token addresses to get the prices for.
-     * @return prices An array of prices for the specified LP tokens.
-     */
-    function getLPPricesSolidly(address[] calldata tokens) public view returns (uint256[] memory prices) {
-        return getLPPricesSolidlyFromFactory(defaultFactorySolidly, tokens);
-    }
+    // /**
+    //  * @dev Returns the prices of multiple LP tokens using the getLPPriceV2 function.
+    //  * @param tokens An array of LP token addresses to get the prices for.
+    //  * @return prices An array of prices for the specified LP tokens.
+    //  */
+    // function getLPPricesXFAI(address[] calldata tokens) public view override returns (uint256[] memory prices) {
+    //     return getLPPricesXFAIFromFactory(defaultFactoryXFAI, tokens);
+    // }
 
-    /**
-     * @dev This function takes in an instance of the ApeSwap factory contract and an array of token addresses,
-     * and returns an array of prices for each corresponding liquidity pool. It iterates through each token address,
-     * and calls the `getLPPriceV2` function to retrieve the price of the corresponding liquidity pool. The prices
-     * are stored in an array and returned.
-     *
-     * @param factorySolidly An instance of the ApeSwap factory contract
-     * @param tokens An array of token addresses
-     * @return prices An array of prices for each corresponding liquidity pool
-     */
-    function getLPPricesSolidlyFromFactory(
-        ISolidlyFactory factorySolidly,
-        address[] calldata tokens
-    ) public view returns (uint256[] memory prices) {
-        prices = new uint256[](tokens.length);
-        for (uint256 i; i < prices.length; i++) {
-            address token = tokens[i];
-            prices[i] = getLPPriceSolidlyFromFactory(factorySolidly, token);
-        }
-    }
+    // /**
+    //  * @dev This function takes in an instance of the ApeSwap factory contract and an array of token addresses,
+    //  * and returns an array of prices for each corresponding liquidity pool. It iterates through each token address,
+    //  * and calls the `getLPPriceXFAI` function to retrieve the price of the corresponding liquidity pool. The prices
+    //  * are stored in an array and returned.
+    //  *
+    //  * @param factoryXFAI An instance of the ApeSwap factory contract
+    //  * @param tokens An array of token addresses
+    //  * @return prices An array of prices for each corresponding liquidity pool
+    //  */
+    // function getLPPricesXFAIFromFactory(
+    //     IXFAIFactory factoryXFAI,
+    //     address[] calldata tokens
+    // ) public view returns (uint256[] memory prices) {
+    //     prices = new uint256[](tokens.length);
+    //     for (uint256 i; i < prices.length; i++) {
+    //         address token = tokens[i];
+    //         prices[i] = getLPPriceXFAIFromFactory(factoryXFAI, token);
+    //     }
+    // }
+
+    // /**
+    //  * @dev Returns the prices of multiple LP tokens using the getLPPriceV2 function.
+    //  * @param tokens An array of LP token addresses to get the prices for.
+    //  * @return prices An array of prices for the specified LP tokens.
+    //  */
+    // function getLPPricesSolidly(address[] calldata tokens) public view returns (uint256[] memory prices) {
+    //     return getLPPricesSolidlyFromFactory(defaultFactorySolidly, tokens);
+    // }
+
+    // /**
+    //  * @dev This function takes in an instance of the ApeSwap factory contract and an array of token addresses,
+    //  * and returns an array of prices for each corresponding liquidity pool. It iterates through each token address,
+    //  * and calls the `getLPPriceV2` function to retrieve the price of the corresponding liquidity pool. The prices
+    //  * are stored in an array and returned.
+    //  *
+    //  * @param factorySolidly An instance of the ApeSwap factory contract
+    //  * @param tokens An array of token addresses
+    //  * @return prices An array of prices for each corresponding liquidity pool
+    //  */
+    // function getLPPricesSolidlyFromFactory(
+    //     ISolidlyFactory factorySolidly,
+    //     address[] calldata tokens
+    // ) public view returns (uint256[] memory prices) {
+    //     prices = new uint256[](tokens.length);
+    //     for (uint256 i; i < prices.length; i++) {
+    //         address token = tokens[i];
+    //         prices[i] = getLPPriceSolidlyFromFactory(factorySolidly, token);
+    //     }
+    // }
 
     /**
      * @dev Returns the price of an LP token.
@@ -325,21 +409,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
      * @return price The price of the gamma LP token.
      */
     function getLPPriceGamma(Hypervisor lp) public view override returns (uint256 price) {
-        (uint256 priceToken0, ) = _getPriceAlgebra(defaultFactoryAlgebra, address(lp.token0()));
-        if (priceToken0 == 0) {
-            (priceToken0, ) = _getPriceV2(defaultFactoryV2, address(lp.token0()));
-        }
-        (uint256 priceToken1, ) = _getPriceAlgebra(defaultFactoryAlgebra, address(lp.token1()));
-        if (priceToken1 == 0) {
-            (priceToken1, ) = _getPriceV2(defaultFactoryV2, address(lp.token0()));
-        }
-        (uint256 total0, uint256 total1) = lp.getTotalAmounts();
-        price =
-            (priceToken0 *
-                _normalizeToken(total0, address(lp.token0())) +
-                priceToken1 *
-                _normalizeToken(total1, address(lp.token1()))) /
-            lp.totalSupply();
+        return getLPPriceGammaFromFactory(defaultFactoryAlgebra, defaultFactoryV2, lp);
     }
 
     function getLPPriceGammaFromFactory(
@@ -361,43 +431,43 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         (uint256 total0, uint256 total1) = lp.getTotalAmounts();
         price =
             (priceToken0 *
-                _normalizeToken(total0, address(lp.token0())) +
+                UtilityLibrary._normalizeToken(total0, address(lp.token0())) +
                 priceToken1 *
-                _normalizeToken(total1, address(lp.token1()))) /
+                UtilityLibrary._normalizeToken(total1, address(lp.token1()))) /
             lp.totalSupply();
     }
 
-    /**
-     * @dev Returns the price of a steer LP token.
-     * @param factoryV3 The address of the V3 factory
-     * @param factoryV2 The address of the V2 factory
-     * @param lp The address of the steer LP pair.
-     * @return price The price of the steer LP token.
-     */
-    function getLPPriceSteerFromFactory(
-        IUniswapV3Factory factoryV3,
-        IApeFactory factoryV2,
-        ISteerVault lp
-    ) public view override returns (uint256 price) {
-        if (address(factoryV2) == address(0)) {
-            factoryV2 = defaultFactoryV2;
-        }
-        (uint256 priceToken0, ) = _getPriceV3(factoryV3, address(lp.token0()));
-        if (priceToken0 == 0) {
-            (priceToken0, ) = _getPriceV2(factoryV2, address(lp.token0()));
-        }
-        (uint256 priceToken1, ) = _getPriceV3(factoryV3, address(lp.token1()));
-        if (priceToken1 == 0) {
-            (priceToken1, ) = _getPriceV2(factoryV2, address(lp.token0()));
-        }
-        (uint256 total0, uint256 total1) = lp.getTotalAmounts();
-        price =
-            (priceToken0 *
-                _normalizeToken(total0, address(lp.token0())) +
-                priceToken1 *
-                _normalizeToken(total1, address(lp.token1()))) /
-            lp.totalSupply();
-    }
+    // /**
+    //  * @dev Returns the price of a steer LP token.
+    //  * @param factoryV3 The address of the V3 factory
+    //  * @param factoryV2 The address of the V2 factory
+    //  * @param lp The address of the steer LP pair.
+    //  * @return price The price of the steer LP token.
+    //  */
+    // function getLPPriceSteerFromFactory(
+    //     IUniswapV3Factory factoryV3,
+    //     IApeFactory factoryV2,
+    //     ISteerVault lp
+    // ) public view override returns (uint256 price) {
+    //     if (address(factoryV2) == address(0)) {
+    //         factoryV2 = defaultFactoryV2;
+    //     }
+    //     (uint256 priceToken0, ) = _getPriceV3(factoryV3, address(lp.token0()));
+    //     if (priceToken0 == 0) {
+    //         (priceToken0, ) = _getPriceV2(factoryV2, address(lp.token0()));
+    //     }
+    //     (uint256 priceToken1, ) = _getPriceV3(factoryV3, address(lp.token1()));
+    //     if (priceToken1 == 0) {
+    //         (priceToken1, ) = _getPriceV2(factoryV2, address(lp.token0()));
+    //     }
+    //     (uint256 total0, uint256 total1) = lp.getTotalAmounts();
+    //     price =
+    //         (priceToken0 *
+    //             UtilityLibrary._normalizeToken(total0, address(lp.token0())) +
+    //             priceToken1 *
+    //             UtilityLibrary._normalizeToken(total1, address(lp.token1()))) /
+    //         lp.totalSupply();
+    // }
 
     /**
      * @dev Returns the price of an LP token.
@@ -584,8 +654,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             uint256 lpAlgebraPrice = getLPPriceGammaFromFactory(factoryAlgebra, factoryV2, Hypervisor(token));
             return lpAlgebraPrice;
         } else if (protocol == Protocol.Steer) {
-            uint256 lpSteerPrice = getLPPriceSteerFromFactory(factoryV3, factoryV2, ISteerVault(token));
-            return lpSteerPrice;
+            revert("No support for Steer yet on this function");
+            // uint256 lpSteerPrice = getLPPriceSteerFromFactory(factoryV3, factoryV2, ISteerVault(token));
+            // return lpSteerPrice;
         } else if (protocol == Protocol.Solidly) {
             uint256 lpSolidlyPrice = getLPPriceSolidlyFromFactory(factorySolidly, token);
             return lpSolidlyPrice;
@@ -706,6 +777,37 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     }
 
     /**
+     * @dev Calculates the price of wNative using XFAI pricing.
+     * Compares multiple stable pools and weights by their oracle price.
+     * @param factoryXFAI The address of the XFAI factory
+     * @return price price of wNative in USD
+     * @return wNativeTotal The total amount of wNative in the pools.
+     */
+    function _getNativePriceXFAI(IXFAIFactory factoryXFAI) internal view returns (uint256 price, uint256 wNativeTotal) {
+        /// @dev This method calculates the price of wNative by comparing multiple stable pools and weighting by their oracle price
+        uint256 usdStableTotal = 0;
+        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
+            address stableUsdToken = stableUsdTokens[i];
+            (uint256 stableUsdReserve, uint256 wNativeReserve) = _getNormalizedReservesFromFactoryXFAI_Decimals(
+                factoryXFAI,
+                stableUsdToken,
+                stableUsdTokenDecimals[stableUsdToken],
+                wNativeDecimals
+            );
+            uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
+            if (stableUsdPrice > 0) {
+                /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
+                usdStableTotal += (stableUsdReserve * stableUsdPrice) / 1e18;
+            } else {
+                usdStableTotal += stableUsdReserve;
+            }
+            wNativeTotal += wNativeReserve;
+        }
+
+        price = (usdStableTotal * 1e18) / wNativeTotal;
+    }
+
+    /**
      * @dev Calculates the price of wNative using V3 pricing.
      * Uses Uniswap V3 pools with various fees and stable tokens.
      * @param factoryV3 The address of the V3 factory
@@ -802,7 +904,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
                 defaultFactoryV2,
                 defaultFactoryV3,
                 defaultFactoryAlgebra,
-                defaultFactorySolidly
+                defaultFactorySolidly,
+                defaultFactoryXFAI
             );
     }
 
@@ -812,7 +915,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
         IAlgebraFactory factoryAlgebra,
-        ISolidlyFactory factorySolidly
+        ISolidlyFactory factorySolidly,
+        IXFAIFactory factoryXFAI
     ) public view override returns (uint256 price) {
         if (token == wNative) {
             return getNativePriceFromFactory(protocol, factoryV2, factoryV3, defaultFactorySolidly);
@@ -837,6 +941,9 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         } else if (protocol == Protocol.Solidly) {
             (uint256 tokenAlgebraPrice, ) = _getPriceSolidly(factorySolidly, token);
             return tokenAlgebraPrice;
+        } else if (protocol == Protocol.XFAI) {
+            (uint256 tokenAlgebraPrice, ) = _getPriceXFAI(factoryXFAI, token);
+            return tokenAlgebraPrice;
         } else {
             revert("Invalid protocol");
         }
@@ -858,7 +965,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             defaultFactoryV2,
             defaultFactoryV3,
             defaultFactoryAlgebra,
-            defaultFactorySolidly
+            defaultFactorySolidly,
+            defaultFactoryXFAI
         );
     }
 
@@ -868,14 +976,23 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         IApeFactory factoryV2,
         IUniswapV3Factory factoryV3,
         IAlgebraFactory factoryAlgebra,
-        ISolidlyFactory factorySolidly
+        ISolidlyFactory factorySolidly,
+        IXFAIFactory factoryXFAI
     ) public view override returns (uint256[] memory prices) {
         uint256 tokenLength = tokens.length;
         prices = new uint256[](tokenLength);
 
         for (uint256 i; i < tokenLength; i++) {
             address token = tokens[i];
-            prices[i] = getPriceFromFactory(token, protocol, factoryV2, factoryV3, factoryAlgebra, factorySolidly);
+            prices[i] = getPriceFromFactory(
+                token,
+                protocol,
+                factoryV2,
+                factoryV3,
+                factoryAlgebra,
+                factorySolidly,
+                factoryXFAI
+            );
         }
     }
 
@@ -885,6 +1002,47 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
 
     function getPriceV2FromFactory(IApeFactory factoryV2, address token) public view override returns (uint256 price) {
         (price, ) = _getPriceV2(factoryV2, token);
+    }
+
+    /**
+     * @dev Returns the price and total balance of the given token based on the XFAI liquidity pool.
+     * @param token Address of the token for which the price and total balance are requested.
+     * @return price The price of the token based on the XFAI liquidity pool.
+     * @return tokenTotal Total balance of the token based on the XFAI liquidity pool.
+     */
+    function _getPriceXFAI(
+        IXFAIFactory factoryXFAI,
+        address token
+    ) internal view returns (uint256 price, uint256 tokenTotal) {
+        (uint256 nativePrice, ) = _getNativePriceXFAI(factoryXFAI);
+        if (token == wNative) {
+            /// @dev Returning high total balance for wNative to heavily weight value.
+            return (nativePrice, 1e36);
+        }
+
+        LocalVarsV2Price memory vars;
+
+        (vars.tokenReserve, vars.wNativeReserve) = _getNormalizedReservesFromFactoryXFAI_Decimals(
+            factoryXFAI,
+            token,
+            UtilityLibrary._getTokenDecimals(token),
+            wNativeDecimals
+        );
+        vars.wNativeTotal = (vars.wNativeReserve * nativePrice) / 1e18;
+        tokenTotal += vars.tokenReserve;
+
+        price = (vars.wNativeTotal * 1e18) / tokenTotal;
+    }
+
+    function getPriceXFAI(address token) public view override returns (uint256 price) {
+        (price, ) = _getPriceXFAI(defaultFactoryXFAI, token);
+    }
+
+    function getPriceXFAIFromFactory(
+        IXFAIFactory factoryXFAI,
+        address token
+    ) public view override returns (uint256 price) {
+        (price, ) = _getPriceXFAI(factoryXFAI, token);
     }
 
     /**
@@ -914,7 +1072,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             factoryV2,
             token,
             wNative,
-            _getTokenDecimals(token),
+            UtilityLibrary._getTokenDecimals(token),
             wNativeDecimals
         );
         vars.wNativeTotal = (vars.wNativeReserve * nativePrice) / 1e18;
@@ -926,7 +1084,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
                 factoryV2,
                 token,
                 stableUsdToken,
-                _getTokenDecimals(token),
+                UtilityLibrary._getTokenDecimals(token),
                 stableUsdTokenDecimals[stableUsdToken]
             );
             uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
@@ -973,7 +1131,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             factorySolidly,
             token,
             wNative,
-            _getTokenDecimals(token),
+            UtilityLibrary._getTokenDecimals(token),
             wNativeDecimals
         );
         vars.wNativeTotal = (vars.wNativeReserve * nativePrice) / 1e18;
@@ -985,7 +1143,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
                 factorySolidly,
                 token,
                 stableUsdToken,
-                _getTokenDecimals(token),
+                UtilityLibrary._getTokenDecimals(token),
                 stableUsdTokenDecimals[stableUsdToken]
             );
             uint256 stableUsdPrice = _getOraclePriceNormalized(stableUsdToken);
@@ -1155,7 +1313,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         OracleInfo memory oracleInfo = tokenOracles[token];
         if (oracleInfo.oracleType == OracleType.CHAIN_LINK) {
             uint256 tokenUSDPrice = _getChainlinkPriceRaw(oracleInfo.oracleAddress);
-            return _normalize(tokenUSDPrice, oracleInfo.oracleDecimals);
+            return UtilityLibrary._normalize(tokenUSDPrice, oracleInfo.oracleDecimals);
         }
         /// @dev Additional oracle types can be implemented here.
         // else if (oracleInfo.oracleType == OracleType.<NEW_ORACLE>) { }
@@ -1272,6 +1430,27 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
     }
 
     /**
+     * @dev Get normalized reserves for a given token pair from the ApeSwap Factory contract, specifying decimals.
+     * @param factoryXFAI The address of the XFAI factory.
+     * @param decimalsA The number of decimals for the first token in the pair.
+     * @param decimalsB The number of decimals for the second token in the pair.
+     * @return normalizedReserveA The normalized reserve of the first token in the pair.
+     * @return normalizedReserveB The normalized reserve of the second token in the pair.
+     */
+    function _getNormalizedReservesFromFactoryXFAI_Decimals(
+        IXFAIFactory factoryXFAI,
+        address tokenA,
+        uint8 decimalsA,
+        uint8 decimalsB
+    ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
+        address pairAddress = factoryXFAI.getPool(tokenA);
+        if (pairAddress == address(0)) {
+            return (0, 0);
+        }
+        return _getNormalizedReservesFromXFAIPair_Decimals(pairAddress, decimalsA, decimalsB);
+    }
+
+    /**
      * @dev This internal function takes in a pair address, two token addresses (tokenA and tokenB), and their respective decimals.
      * It returns the normalized reserves for each token in the pair.
      *
@@ -1296,53 +1475,25 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         uint8 decimalsB
     ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
         try IApePair(pair).getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
-            if (_isSorted(tokenA, tokenB)) {
-                return (_normalize(reserve0, decimalsA), _normalize(reserve1, decimalsB));
+            if (UtilityLibrary._isSorted(tokenA, tokenB)) {
+                return (UtilityLibrary._normalize(reserve0, decimalsA), UtilityLibrary._normalize(reserve1, decimalsB));
             } else {
-                return (_normalize(reserve1, decimalsA), _normalize(reserve0, decimalsB));
+                return (UtilityLibrary._normalize(reserve1, decimalsA), UtilityLibrary._normalize(reserve0, decimalsB));
             }
         } catch {
             return (0, 0);
         }
     }
 
-    function _isSorted(address tokenA, address tokenB) internal pure returns (bool isSorted) {
-        //  (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        isSorted = tokenA < tokenB ? true : false;
-    }
-
-    function _getTokenDecimals(address token) internal view returns (uint8 decimals) {
-        try IERC20(token).decimals() returns (uint8 dec) {
-            decimals = dec;
+    function _getNormalizedReservesFromXFAIPair_Decimals(
+        address pair,
+        uint8 decimalsA,
+        uint8 decimalsB
+    ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
+        try IXFAIPool(pair).getStates() returns (uint reserve0, uint reserve1) {
+            return (UtilityLibrary._normalize(reserve0, decimalsA), UtilityLibrary._normalize(reserve1, decimalsB));
         } catch {
-            decimals = 18;
-        }
-    }
-
-    /// @notice Normalize the amount of a token to wei or 1e18
-    function _normalizeToken(uint256 amount, address token) private view returns (uint256) {
-        return _normalize(amount, _getTokenDecimals(token));
-    }
-
-    /// @notice Normalize the amount of a token to wei or 1e18
-    function _normalizeToken112(uint112 amount, address token) private view returns (uint112) {
-        return _normalize112(amount, _getTokenDecimals(token));
-    }
-
-    /// @notice Normalize the amount passed to wei or 1e18 decimals
-    function _normalize(uint256 amount, uint8 decimals) private pure returns (uint256) {
-        if (decimals == 18) return amount;
-        return (amount * (10 ** 18)) / (10 ** decimals);
-    }
-
-    /// @notice Normalize the amount passed to wei or 1e18 decimals
-    function _normalize112(uint112 amount, uint8 decimals) private pure returns (uint112) {
-        if (decimals == 18) {
-            return amount;
-        } else if (decimals > 18) {
-            return uint112(amount / (10 ** (decimals - 18)));
-        } else {
-            return uint112(amount * (10 ** (18 - decimals)));
+            return (0, 0);
         }
     }
 }
