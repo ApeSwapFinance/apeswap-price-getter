@@ -157,6 +157,78 @@ function getNetworkConfig(network: any) {
         '0x5133D67c38AFbdd02997c14Abd8d83676B4e309A',
       ],
     }
+  } else if (['lightlink'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x7EbeF2A4b1B09381Ec5B9dF8C5c6f2dBECA59c73',
+      nativeLiquidityThreshold: "2000000000000000", //0.002
+      factoryV2: '0x0000000000000000000000000000000000000000', //
+      factoryAlgebra: '0x0000000000000000000000000000000000000000',
+      factoryV3: '0xEE6099234bbdC793a43676D98Eb6B589ca7112D7', // elektrik
+      factorySolidly: '0x0000000000000000000000000000000000000000', //
+      factoryXFAI: '0x0000000000000000000000000000000000000000', //
+      proxyAdminContract: '',
+      stableUsdTokens: [
+        '0x6308fa9545126237158778e74AE1b6b89022C5c0', //USDT
+        '0x18fB38404DADeE1727Be4b805c5b242B5413Fa40', //USDC
+        '0x49F65C3FfC6e45104ff5cB00e6030C626157a90b', //DAI
+      ],
+      oracleTokens: [
+      ],
+      // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain
+      oracles: [
+      ],
+    }
+  }
+  else if (['iota'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x6e47f8d48a01b44DF3fFF35d258A10A3AEdC114c',
+      nativeLiquidityThreshold: "55000000000000000000", //55
+      factoryV2: '0x349aaAc3a500014981CBA11b64C76c66a6c1e8D0', //MagicSea
+      factoryAlgebra: '0x0000000000000000000000000000000000000000',
+      factoryV3: '0x0000000000000000000000000000000000000000', // 
+      factorySolidly: '0x0000000000000000000000000000000000000000', //
+      factoryXFAI: '0x0000000000000000000000000000000000000000', //
+      proxyAdminContract: '',
+      stableUsdTokens: [
+        '0xC1B8045A6ef2934Cf0f78B0dbD489969Fa9Be7E4', //USDT
+        '0xFbDa5F676cB37624f28265A144A48B0d6e87d3b6', //USDC
+      ],
+      oracleTokens: [
+      ],
+      // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain
+      oracles: [
+      ],
+    }
+  }
+  else if (['base'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x4200000000000000000000000000000000000006',
+      nativeLiquidityThreshold: "2000000000000000", //0.002
+      factoryV2: '0x4bd16d59A5E1E0DB903F724aa9d721a31d7D720D', // Synthswap
+      factoryAlgebra: '0xa37359E63D1aa44C0ACb2a4605D3B45785C97eE3', // Synthswap
+      factoryV3: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD', //UniswapV3 
+      factorySolidly: '0x420DD381b31aEf6683db6B902084cB0FFECe40Da', //  Aerodrome
+      factoryXFAI: '0x0000000000000000000000000000000000000000', //
+      proxyAdminContract: '',
+      stableUsdTokens: [
+        '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', //USDC
+        '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', //DAI
+      ],
+      oracleTokens: [
+        "0x4200000000000000000000000000000000000006",
+        "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
+      ],
+      // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain
+      oracles: [
+        "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
+        "0x7e860098F58bBFC8648a4311b374B1D669a2bc6B",
+        "0x591e79239a7d679378eC8c847e5038150364C78F",
+      ],
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

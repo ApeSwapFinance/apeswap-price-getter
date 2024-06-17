@@ -192,6 +192,24 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 80001,
     accounts: testnetAccounts,
   },
+  lightlink: {
+    url: 'https://replicator.phoenix.lightlink.io/rpc/v1',
+    getExplorerUrl: (address: string) => `https://phoenix.lightlink.io/address/${address}`,
+    chainId: 1890,
+    accounts: mainnetAccounts,
+  },
+  iota: {
+    url: 'https://json-rpc.evm.iotaledger.net',
+    getExplorerUrl: (address: string) => `https://explorer.evm.iota.org/address/${address}`,
+    chainId: 8822,
+    accounts: mainnetAccounts,
+  },
+  base: {
+    url: 'https://base-pokt.nodies.app',
+    getExplorerUrl: (address: string) => `https://basescan.org/address/${address}`,
+    chainId: 8453,
+    accounts: mainnetAccounts,
+  },
   telos: {
     url: getEnv('TELOS_RPC_URL') || 'https://mainnet.telos.net/evm',
     getExplorerUrl: (address: string) => `https://www.teloscan.io/address/${address}`,
@@ -282,6 +300,9 @@ const config: HardhatUserConfig = {
       // polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
       linea: getEnv('LINEASCAN_API_KEY'),
       lineaTestnet: getEnv('LINEASCAN_API_KEY'),
+      lightlink: getEnv('LIGHTLINK_API_KEY'),
+      base: getEnv('BASESCAN_API_KEY'),
+      iota: getEnv('IOTASCAN_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -292,6 +313,14 @@ const config: HardhatUserConfig = {
           apiURL: "https://api.lineascan.build/api",
           browserURL: "https://lineascan.build/"
         }
+      },
+      {
+        network: 'lightlink',
+        chainId: 1890,
+        urls: {
+          apiURL: 'https://phoenix.lightlink.io/api',
+          browserURL: 'https://phoenix.lightlink.io',
+        },
       }
     ]
   },
