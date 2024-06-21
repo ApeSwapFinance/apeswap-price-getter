@@ -212,10 +212,11 @@ function getNetworkConfig(network: any) {
       factoryV3: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD', //UniswapV3 
       factorySolidly: '0x420DD381b31aEf6683db6B902084cB0FFECe40Da', //  Aerodrome
       factoryXFAI: '0x0000000000000000000000000000000000000000', //
-      proxyAdminContract: '',
+      proxyAdminContract: '0x218eb9acdc721e235969a30f5da46fb1224fa7a7',
       stableUsdTokens: [
         '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', //USDC
         '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', //DAI
+        '0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376' //USD+
       ],
       oracleTokens: [
         "0x4200000000000000000000000000000000000006",

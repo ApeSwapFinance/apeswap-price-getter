@@ -104,8 +104,8 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             _setTokenOracle(_oracleTokens[i], _oracles[i], OracleType.CHAIN_LINK);
         }
 
-        // Add the stable USD tokens to the stableCoins array using the _addStableUsdTokens() internal helper function
-        _addStableUsdTokens(_stableUsdTokens);
+        // Add the stable USD tokens to the stableCoins array using the addStableUsdTokens() internal helper function
+        addStableUsdTokens(_stableUsdTokens);
 
         // Set the wrapped native token (wNative) address
         wNative = _wNative;
@@ -139,7 +139,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
      * @dev Adds new stable USD tokens to the list of supported stable USD tokens.
      * @param newStableUsdTokens An array of addresses representing the new stable USD tokens to add.
      */
-    function _addStableUsdTokens(address[] memory newStableUsdTokens) internal {
+    function addStableUsdTokens(address[] memory newStableUsdTokens) public onlyOwner {
         for (uint256 i = 0; i < newStableUsdTokens.length; i++) {
             address stableUsdToken = newStableUsdTokens[i];
             stableUsdTokens.push(newStableUsdTokens[i]);
@@ -1422,11 +1422,19 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         uint8 decimalsB
     ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
         /// @dev Defaulting to stable == false
-        address pairAddress = factorySolidly.getPair(tokenA, tokenB, false);
-        if (pairAddress == address(0)) {
-            return (0, 0);
-        }
-        return _getNormalizedReservesFromPair_Decimals(pairAddress, tokenA, tokenB, decimalsA, decimalsB);
+        try factorySolidly.getPair(tokenA, tokenB, false) returns (address pairAddress) {
+            if (pairAddress == address(0)) {
+                return (0, 0);
+            }
+            return _getNormalizedReservesFromPair_Decimals(pairAddress, tokenA, tokenB, decimalsA, decimalsB);
+        } catch {}
+        try factorySolidly.getPool(tokenA, tokenB, false) returns (address pairAddress) {
+            if (pairAddress == address(0)) {
+                return (0, 0);
+            }
+            return _getNormalizedReservesFromPair_Decimals(pairAddress, tokenA, tokenB, decimalsA, decimalsB);
+        } catch {}
+        revert("No solidly pair found");
     }
 
     /**

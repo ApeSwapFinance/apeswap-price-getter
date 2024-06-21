@@ -242,7 +242,7 @@ function getSolcUserConfig(): SolcUserConfig[] {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 1000,
+          runs: 500,
         },
       },
     }
@@ -351,6 +351,9 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       // NOTE: I don't believe TELOS verification is supported
       telos: getEnv('TELOSSCAN_API_KEY'),
       telosTestnet: getEnv('TELOSSCAN_API_KEY_API_KEY'),
+      base: getEnv('BASESCAN_API_KEY'),
+      iota: getEnv('IOTASCAN_API_KEY'),
+      lightlink: getEnv('LIGHTLINK_API_KEY'),
     },
   },
 }
