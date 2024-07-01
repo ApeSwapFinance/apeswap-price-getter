@@ -647,21 +647,21 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             uint256 lpV2Price = getLPPriceV2FromFactory(factoryV2, token);
             return lpV2Price;
         } else if (protocol == Protocol.V3) {
-            revert("No support for V3 yet on this function");
+            revert("No supported");
         } else if (protocol == Protocol.Algebra) {
-            revert("No support for Algebra yet on this function");
+            revert("No supported");
         } else if (protocol == Protocol.Gamma) {
             uint256 lpAlgebraPrice = getLPPriceGammaFromFactory(factoryAlgebra, factoryV2, Hypervisor(token));
             return lpAlgebraPrice;
         } else if (protocol == Protocol.Steer) {
-            revert("No support for Steer yet on this function");
+            revert("No supported");
             // uint256 lpSteerPrice = getLPPriceSteerFromFactory(factoryV3, factoryV2, ISteerVault(token));
             // return lpSteerPrice;
         } else if (protocol == Protocol.Solidly) {
             uint256 lpSolidlyPrice = getLPPriceSolidlyFromFactory(factorySolidly, token);
             return lpSolidlyPrice;
         } else {
-            revert("Invalid protocol");
+            revert("Invalid");
         }
     }
 
@@ -706,7 +706,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             (uint256 nativeAlgebraPrice, ) = _getNativePriceSolidly(factorySolidly);
             return nativeAlgebraPrice;
         } else {
-            revert("Invalid protocol");
+            revert("Invalid");
         }
     }
 
@@ -945,7 +945,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             (uint256 tokenAlgebraPrice, ) = _getPriceXFAI(factoryXFAI, token);
             return tokenAlgebraPrice;
         } else {
-            revert("Invalid protocol");
+            revert("Invalid");
         }
     }
 
@@ -1434,7 +1434,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
             }
             return _getNormalizedReservesFromPair_Decimals(pairAddress, tokenA, tokenB, decimalsA, decimalsB);
         } catch {}
-        revert("No solidly pair found");
+        revert("No pair found");
     }
 
     /**
@@ -1482,15 +1482,51 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         uint8 decimalsA,
         uint8 decimalsB
     ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
-        try IApePair(pair).getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
-            if (UtilityLibrary._isSorted(tokenA, tokenB)) {
-                return (UtilityLibrary._normalize(reserve0, decimalsA), UtilityLibrary._normalize(reserve1, decimalsB));
-            } else {
-                return (UtilityLibrary._normalize(reserve1, decimalsA), UtilityLibrary._normalize(reserve0, decimalsB));
+        (bool success, bytes memory returnData) = pair.staticcall(abi.encodeWithSignature("getReserves()"));
+
+        if (success) {
+            try this.decodeReservesWithLP(returnData) returns (uint112 reserve0, uint112 reserve1, uint32) {
+                if (UtilityLibrary._isSorted(tokenA, tokenB)) {
+                    return (
+                        UtilityLibrary._normalize(reserve0, decimalsA),
+                        UtilityLibrary._normalize(reserve1, decimalsB)
+                    );
+                } else {
+                    return (
+                        UtilityLibrary._normalize(reserve1, decimalsA),
+                        UtilityLibrary._normalize(reserve0, decimalsB)
+                    );
+                }
+            } catch {
+                try this.decodeReservesWithoutLP(returnData) returns (uint256 reserve0, uint256 reserve1) {
+                    if (UtilityLibrary._isSorted(tokenA, tokenB)) {
+                        return (
+                            UtilityLibrary._normalize(reserve0, decimalsA),
+                            UtilityLibrary._normalize(reserve1, decimalsB)
+                        );
+                    } else {
+                        return (
+                            UtilityLibrary._normalize(reserve1, decimalsA),
+                            UtilityLibrary._normalize(reserve0, decimalsB)
+                        );
+                    }
+                } catch {
+                    return (0, 0);
+                }
             }
-        } catch {
+        } else {
             return (0, 0);
         }
+    }
+
+    function decodeReservesWithLP(
+        bytes memory data
+    ) public pure returns (uint112 reserve0, uint112 reserve1, uint32 lp) {
+        return abi.decode(data, (uint112, uint112, uint32));
+    }
+
+    function decodeReservesWithoutLP(bytes memory data) public pure returns (uint256 reserve0, uint256 reserve1) {
+        return abi.decode(data, (uint256, uint256));
     }
 
     function _getNormalizedReservesFromXFAIPair_Decimals(
