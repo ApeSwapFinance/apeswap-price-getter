@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity =0.6.6;
+pragma solidity 0.8.16;
 
+/**
+ * @title IPriceGetterV1
+ * @dev This is the original interface for the PriceGetter contract for backward compatibility.
+ */
 interface IPriceGetterV1 {
     function DECIMALS() external view returns (uint256);
 
