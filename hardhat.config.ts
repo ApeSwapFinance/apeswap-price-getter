@@ -3,6 +3,7 @@ import { HardhatUserConfig } from 'hardhat/config'
 import 'solidity-coverage'
 import 'hardhat-docgen'
 import 'hardhat-contract-sizer'
+import '@typechain/hardhat'
 
 import { task, types } from 'hardhat/config'
 import { TASK_TEST } from 'hardhat/builtin-tasks/task-names'

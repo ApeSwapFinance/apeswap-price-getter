@@ -4,6 +4,13 @@ pragma solidity 0.8.16;
 import "../IPriceGetter.sol";
 
 interface IPriceGetterExtension {
+    struct PriceGetterParams {
+        IPriceGetter mainPriceGetter;
+        IPriceGetter.TokenAndDecimals wrappedNative;
+        IPriceGetter.TokenAndDecimals[] stableUsdTokens;
+        uint256 nativeLiquidityThreshold;
+    }
+
     /**
      * @dev Returns the price of a token.
      * @param token The address of the token to get the price for.
@@ -12,10 +19,7 @@ interface IPriceGetterExtension {
     function getTokenPrice(
         address token,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) external view returns (uint256 price);
 
     /**
@@ -26,10 +30,7 @@ interface IPriceGetterExtension {
     function getLPPrice(
         address lp,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) external view returns (uint256 price);
 
     /**
@@ -38,9 +39,6 @@ interface IPriceGetterExtension {
      */
     function getNativePrice(
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) external view returns (uint256 nativePrice);
 }

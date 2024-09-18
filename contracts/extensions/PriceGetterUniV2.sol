@@ -21,14 +21,11 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
     function getTokenPrice(
         address token,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
-    ) public view returns (uint256 price) {
+        PriceGetterParams memory params
+    ) public view override returns (uint256 price) {
         IApeFactory factoryV2 = IApeFactory(factory);
-        uint256 nativePrice = mainPriceGetter.getNativePrice(IPriceGetter.Protocol.V2, address(factoryV2));
-        if (token == wrappedNative.tokenAddress) {
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.V2, address(factoryV2));
+        if (token == params.wrappedNative.tokenAddress) {
             /// @dev Returning high total balance for wrappedNative to heavily weight value.
             return nativePrice;
         }
@@ -38,15 +35,15 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
         (vars.tokenReserve, vars.wrappedNativeReserve) = _getNormalizedReservesFromFactoryV2_Decimals(
             factoryV2,
             token,
-            wrappedNative.tokenAddress,
+            params.wrappedNative.tokenAddress,
             UtilityLibrary._getTokenDecimals(token),
-            wrappedNative.decimals
+            params.wrappedNative.decimals
         );
         vars.wrappedNativeTotal = (vars.wrappedNativeReserve * nativePrice) / 1e18;
         uint256 tokenTotal = vars.tokenReserve;
 
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            IPriceGetter.TokenAndDecimals memory stableUsdToken = stableUsdTokens[i];
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            IPriceGetter.TokenAndDecimals memory stableUsdToken = params.stableUsdTokens[i];
             (vars.tokenReserve, vars.stableUsdReserve) = _getNormalizedReservesFromFactoryV2_Decimals(
                 factoryV2,
                 token,
@@ -54,7 +51,7 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
                 UtilityLibrary._getTokenDecimals(token),
                 stableUsdToken.decimals
             );
-            uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
+            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
 
             if (vars.stableUsdReserve > 10e18) {
                 if (stableUsdPrice > 0) {
@@ -78,10 +75,7 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
     function getLPPrice(
         address lp,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         //if not a LP, handle as a standard token
         try IApePair(lp).getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
@@ -93,18 +87,12 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
             uint256 token0Price = getTokenPrice(
                 token0,
                 factory,
-                mainPriceGetter,
-                wrappedNative,
-                stableUsdTokens,
-                nativeLiquidityThreshold
+                params
             );
             uint256 token1Price = getTokenPrice(
                 token1,
                 factory,
-                mainPriceGetter,
-                wrappedNative,
-                stableUsdTokens,
-                nativeLiquidityThreshold
+                params
             );
             reserve0 = UtilityLibrary._normalizeToken112(reserve0, token0);
             reserve1 = UtilityLibrary._normalizeToken112(reserve1, token1);
@@ -116,10 +104,7 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
             uint256 lpPrice = getTokenPrice(
                 lp,
                 factory,
-                mainPriceGetter,
-                wrappedNative,
-                stableUsdTokens,
-                nativeLiquidityThreshold
+                params
             );
             return lpPrice;
         }
@@ -129,26 +114,23 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
 
     function getNativePrice(
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
-    ) public view returns (uint256 price) {
+        PriceGetterParams memory params
+    ) public view override returns (uint256 price) {
         IApeFactory factoryV2 = IApeFactory(factory);
         uint256 wrappedNativeTotal;
 
         /// @dev This method calculates the price of wrappedNative by comparing multiple stable pools and weighting by their oracle price
         uint256 usdStableTotal = 0;
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            IPriceGetter.TokenAndDecimals memory stableUsdToken = stableUsdTokens[i];
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            IPriceGetter.TokenAndDecimals memory stableUsdToken = params.stableUsdTokens[i];
             (uint256 wrappedNativeReserve, uint256 stableUsdReserve) = _getNormalizedReservesFromFactoryV2_Decimals(
                 factoryV2,
-                wrappedNative.tokenAddress,
+                params.wrappedNative.tokenAddress,
                 stableUsdToken.tokenAddress,
-                wrappedNative.decimals,
+                params.wrappedNative.decimals,
                 stableUsdToken.decimals
             );
-            uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
+            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
             if (stableUsdPrice > 0) {
                 /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
                 usdStableTotal += (stableUsdReserve * stableUsdPrice) / 1e18;

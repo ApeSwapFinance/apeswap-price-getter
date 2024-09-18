@@ -20,14 +20,11 @@ contract PriceGetterXfai is IPriceGetterExtension {
     function getTokenPrice(
         address token,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
-        IXfaiFactory factoryXFAI = IXfaiFactory(factory);
-        uint256 nativePrice = mainPriceGetter.getNativePrice(IPriceGetter.Protocol.XFAI, address(factoryXFAI));
-        if (token == wrappedNative.tokenAddress) {
+        IXfaiFactory factoryXfai = IXfaiFactory(factory);
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.XFAI, address(factoryXfai));
+        if (token == params.wrappedNative.tokenAddress) {
             return nativePrice;
         }
 
@@ -35,15 +32,15 @@ contract PriceGetterXfai is IPriceGetterExtension {
         uint256 totalPrice;
         uint256 totalBalance;
 
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            address stableUsdToken = stableUsdTokens[i].tokenAddress;
-            tempPrice = _getLPPrice(factoryXFAI, token); //, stableUsdToken);
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
+            tempPrice = _getLPPrice(factoryXfai, token); //, stableUsdToken);
             if (tempPrice > 0) {
-                address pair = factoryXFAI.getPool(token);
+                address pair = factoryXfai.getPool(token);
                 uint256 balance = IERC20(token).balanceOf(pair);
                 uint256 balanceStable = IERC20(stableUsdToken).balanceOf(pair);
                 if (balanceStable > 10 * (10 ** IERC20(stableUsdToken).decimals())) {
-                    uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
+                    uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
                     if (stableUsdPrice > 0) {
                         tempPrice = (tempPrice * stableUsdPrice) / 1e18;
                     }
@@ -64,39 +61,33 @@ contract PriceGetterXfai is IPriceGetterExtension {
     function getLPPrice(
         address lp,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
-        IXfaiFactory factoryXFAI = IXfaiFactory(factory);
+        IXfaiFactory factoryXfai = IXfaiFactory(factory);
         address token0 = IXfaiPool(lp).poolToken();
-        return _getLPPrice(factoryXFAI, token0);
+        return _getLPPrice(factoryXfai, token0);
     }
 
     // ========== NATIVE PRICE ==========
 
     function getNativePrice(
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
-        IXfaiFactory factoryXFAI = IXfaiFactory(factory);
+        IXfaiFactory factoryXfai = IXfaiFactory(factory);
         uint256 totalPrice;
         uint256 wNativeTotal;
 
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            address stableUsdToken = stableUsdTokens[i].tokenAddress;
-            price = _getLPPrice(factoryXFAI, wrappedNative.tokenAddress); //, stableUsdToken);
-            uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
+            price = _getLPPrice(factoryXfai, params.wrappedNative.tokenAddress); //, stableUsdToken);
+            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
             if (stableUsdPrice > 0) {
                 price = (price * stableUsdPrice) / 1e18;
             }
             if (price > 0) {
-                address pair = factoryXFAI.getPool(wrappedNative.tokenAddress);
-                uint256 balance = IERC20(wrappedNative.tokenAddress).balanceOf(pair);
+                address pair = factoryXfai.getPool(params.wrappedNative.tokenAddress);
+                uint256 balance = IERC20(params.wrappedNative.tokenAddress).balanceOf(pair);
                 totalPrice += price * balance;
                 wNativeTotal += balance;
             }
@@ -110,8 +101,8 @@ contract PriceGetterXfai is IPriceGetterExtension {
 
     // ========== INTERNAL FUNCTIONS ==========
 
-    function _getLPPrice(IXfaiFactory factoryXFAI, address token0) internal view returns (uint256 price) {
-        address tokenPegPair = factoryXFAI.getPool(token0);
+    function _getLPPrice(IXfaiFactory factoryXfai, address token0) internal view returns (uint256 price) {
+        address tokenPegPair = factoryXfai.getPool(token0);
         address token1 = XFIT[block.chainid];
 
         if (tokenPegPair == address(0)) return 0;

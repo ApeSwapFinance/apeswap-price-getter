@@ -13,14 +13,11 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
     function getTokenPrice(
         address token,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IAlgebraFactory factoryAlgebra = IAlgebraFactory(factory);
-        uint256 nativePrice = mainPriceGetter.getNativePrice(IPriceGetter.Protocol.Algebra, factory);
-        if (token == wrappedNative.tokenAddress) {
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.Algebra, factory);
+        if (token == params.wrappedNative.tokenAddress) {
             return nativePrice;
         }
 
@@ -28,15 +25,15 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
         uint256 totalPrice;
         uint256 totalBalance;
 
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            address stableUsdToken = stableUsdTokens[i].tokenAddress;
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
             tempPrice = _getLPPrice(address(factoryAlgebra), token, stableUsdToken);
             if (tempPrice > 0) {
                 address pair = factoryAlgebra.poolByPair(token, stableUsdToken);
                 uint256 balance = IERC20(token).balanceOf(pair);
                 uint256 balanceStable = IERC20(stableUsdToken).balanceOf(pair);
                 if (balanceStable > 10 * (10 ** IERC20(stableUsdToken).decimals())) {
-                    uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
+                    uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
                     if (stableUsdPrice > 0) {
                         tempPrice = (tempPrice * stableUsdPrice) / 1e18;
                     }
@@ -57,37 +54,31 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
     function getLPPrice(
         address lp,
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
-        return _getLPPrice(factory, lp, wrappedNative.tokenAddress);
+        return _getLPPrice(factory, lp, params.wrappedNative.tokenAddress);
     }
 
     // ========== NATIVE PRICE ==========
 
     function getNativePrice(
         address factory,
-        IPriceGetter mainPriceGetter,
-        IPriceGetter.TokenAndDecimals memory wrappedNative,
-        IPriceGetter.TokenAndDecimals[] memory stableUsdTokens,
-        uint256 nativeLiquidityThreshold
+        PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IAlgebraFactory factoryAlgebra = IAlgebraFactory(factory);
         uint256 totalPrice;
         uint256 wNativeTotal;
 
-        for (uint256 i = 0; i < stableUsdTokens.length; i++) {
-            address stableUsdToken = stableUsdTokens[i].tokenAddress;
-            price = _getLPPrice(address(factoryAlgebra), wrappedNative.tokenAddress, stableUsdToken);
-            uint256 stableUsdPrice = mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
+        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
+            address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
+            price = _getLPPrice(address(factoryAlgebra), params.wrappedNative.tokenAddress, stableUsdToken);
+            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
             if (stableUsdPrice > 0) {
                 price = (price * stableUsdPrice) / 1e18;
             }
             if (price > 0) {
-                address pair = factoryAlgebra.poolByPair(wrappedNative.tokenAddress, stableUsdToken);
-                uint256 balance = IERC20(wrappedNative.tokenAddress).balanceOf(pair);
+                address pair = factoryAlgebra.poolByPair(params.wrappedNative.tokenAddress, stableUsdToken);
+                uint256 balance = IERC20(params.wrappedNative.tokenAddress).balanceOf(pair);
                 totalPrice += price * balance;
                 wNativeTotal += balance;
             }

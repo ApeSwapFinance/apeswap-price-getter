@@ -161,22 +161,32 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         nativeLiquidityThreshold = _nativeLiquidityThreshold;
     }
 
+    function setPriceGetterExtension(Protocol protocol, address extension) public onlyOwner {
+        protocolPriceGetter[protocol] = IPriceGetterExtension(extension);
+    }
+
     /** GETTERS */
 
     // ===== Get LP Prices =====
 
     /**
      * @dev Returns the prices of LP token from a specic protocol an factory.
-     * @param token The address of the LP token
+     * @param lp The address of the LP token
      * @param protocol The protocol version to use
      * @param factory The address of the factory used to calculate the price.
      * @return price The current price of LP.
      * @dev Protocol V3 and Algebra not yet supported in here because functions token 2 tokens instead of 1 and for V3 also a fee.
      * Use the dedicated functions for these protocols
      */
-    function getLPPrice(address token, Protocol protocol, address factory) public view returns (uint256 price) {
+    function getLPPrice(address lp, Protocol protocol, address factory) public view returns (uint256 price) {
         IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        price = extension.getLPPrice(token, factory, this, wrappedNative, stableUsdTokens, nativeLiquidityThreshold);
+        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
+            this,
+            wrappedNative,
+            stableUsdTokens,
+            nativeLiquidityThreshold
+        );
+        price = extension.getLPPrice(lp, factory, params);
     }
 
     // ===== Get Native Prices =====
@@ -195,7 +205,13 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         }
 
         IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        nativePrice = extension.getNativePrice(factory, this, wrappedNative, stableUsdTokens, nativeLiquidityThreshold);
+        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
+            this,
+            wrappedNative,
+            stableUsdTokens,
+            nativeLiquidityThreshold
+        );
+        nativePrice = extension.getNativePrice(factory, params);
     }
 
     // ===== Get Token Prices =====
@@ -216,14 +232,13 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         }
 
         IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        tokenPrice = extension.getTokenPrice(
-            token,
-            factory,
+        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
             this,
             wrappedNative,
             stableUsdTokens,
             nativeLiquidityThreshold
         );
+        tokenPrice = extension.getTokenPrice(token, factory, params);
     }
 
     function getTokenPrices(
