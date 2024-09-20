@@ -1,7 +1,6 @@
 import { ethers, network, upgrades } from 'hardhat'
 import getNetworkConfig from '../../deploy-config'
 import { DeployManager } from './DeployManager'
-import { PriceGetter__factory } from '../../typechain-types'
 
 async function main() {
   const currentNetwork = network.name
@@ -25,25 +24,30 @@ async function main() {
     throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
   }
 
-  const priceGetterExtensionName = 'PriceGetterAlgebra'
-  const PriceGetterExtensionFactory = await ethers.getContractFactory(priceGetterExtensionName)
-  const PriceGetterExtension = await deployManager.deployContractFromFactory(
-    PriceGetterExtensionFactory,
-    [],
-    {
-      name: priceGetterExtensionName,
-      estimateGas: false,
-    }
-  )
-
-  const output = {
-    priceGetterExtension: PriceGetterExtension.address,
+  const output: { contracts: Record<string, string>, config: any } = {
+    contracts: {},
     config: {
       wNative,
       stableUsdTokens,
       oracleTokens,
       oracles,
     },
+  }
+
+  const priceGetterProtocolNames = ['PriceGetterUniV2', 'PriceGetterUniV3', 'PriceGetterAlgebra', 'PriceGetterSolidly']
+  for (let i = 0; i < priceGetterProtocolNames.length; i++) {
+    const priceGetterProtocolName = priceGetterProtocolNames[i]
+    const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocolName)
+    const PriceGetterProtocol = await deployManager.deployContractFromFactory(
+      PriceGetterProtocolFactory,
+      [],
+      {
+        name: priceGetterProtocolName,
+        estimateGas: false,
+      }
+    )
+    console.log(`${priceGetterProtocolName} deployed at ${PriceGetterProtocol.address}`)
+    output.contracts[priceGetterProtocolName] = PriceGetterProtocol.address
   }
 
   console.dir(output, { depth: 5 })

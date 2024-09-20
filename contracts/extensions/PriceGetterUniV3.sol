@@ -5,11 +5,11 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 
-import "./IPriceGetterExtension.sol";
+import "./IPriceGetterProtocol.sol";
 import "../IPriceGetter.sol";
 import "../lib/UtilityLibrary.sol";
 
-contract PriceGetterUniV3 is IPriceGetterExtension {
+contract PriceGetterUniV3 is IPriceGetterProtocol {
     // ========== Get Token Prices ==========
 
     function getTokenPrice(
@@ -18,7 +18,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IUniswapV3Factory factoryUniV3 = IUniswapV3Factory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.V3, address(factoryUniV3));
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV2, address(factoryUniV3));
         if (token == params.wrappedNative.tokenAddress) {
             return nativePrice;
         }
@@ -35,7 +35,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
 
         for (uint24 feeIndex = 0; feeIndex < 5; feeIndex++) {
             uint24 fee = fees[feeIndex];
-            tempPrice = _getLPPrice(factoryUniV3, token, params.wrappedNative.tokenAddress, fee);
+            tempPrice = _getRelativePriceLP(factoryUniV3, token, params.wrappedNative.tokenAddress, fee);
             if (tempPrice > 0) {
                 address pair = factoryUniV3.getPool(token, params.wrappedNative.tokenAddress, fee);
                 uint256 balance = IERC20(token).balanceOf(pair);
@@ -70,7 +70,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
     ) internal view returns (uint256 totalPrice, uint256 totalBalance) {
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
-            uint256 tempPrice = _getLPPrice(factoryUniV3, token, stableUsdToken, fee);
+            uint256 tempPrice = _getRelativePriceLP(factoryUniV3, token, stableUsdToken, fee);
             if (tempPrice > 0) {
                 address pair = factoryUniV3.getPool(token, stableUsdToken, fee);
                 uint256 balance = IERC20(token).balanceOf(pair);
@@ -99,7 +99,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
         address token0 = pool.token0();
         address token1 = pool.token1();
         uint24 fee = pool.fee();
-        return _getLPPrice(factoryUniV3, token0, token1, fee);
+        return _getRelativePriceLP(factoryUniV3, token0, token1, fee);
     }
 
     // ========== NATIVE PRICE ==========
@@ -114,7 +114,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
 
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
-            price = _getLPPrice(factoryUniV3, params.wrappedNative.tokenAddress, stableUsdToken, 3000);
+            price = _getRelativePriceLP(factoryUniV3, params.wrappedNative.tokenAddress, stableUsdToken, 3000);
             uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
             if (stableUsdPrice > 0) {
                 price = (price * stableUsdPrice) / 1e18;
@@ -135,7 +135,7 @@ contract PriceGetterUniV3 is IPriceGetterExtension {
 
     // ========== INTERNAL FUNCTIONS ==========
 
-    function _getLPPrice(
+    function _getRelativePriceLP(
         IUniswapV3Factory factoryUniV3,
         address token0,
         address token1,

@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 import "../IPriceGetter.sol";
 
-interface IPriceGetterExtension {
+interface IPriceGetterProtocol {
     struct PriceGetterParams {
         IPriceGetter mainPriceGetter;
         IPriceGetter.TokenAndDecimals wrappedNative;

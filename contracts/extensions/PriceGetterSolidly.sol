@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterExtension.sol";
+import "./IPriceGetterProtocol.sol";
 import "../IPriceGetter.sol";
 import "../lib/UtilityLibrary.sol";
 // Updated imports to Solidly-specific interfaces
 import "../interfaces/ISolidlyPair.sol";
 import "../interfaces/ISolidlyFactory.sol";
 
-contract PriceGetterSolidly is IPriceGetterExtension {
+contract PriceGetterSolidly is IPriceGetterProtocol {
     struct LocalVarsSolidlyPrice {
         uint256 usdStableTotal;
         uint256 wrappedNativeReserve;
@@ -25,7 +25,10 @@ contract PriceGetterSolidly is IPriceGetterExtension {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         ISolidlyFactory factorySolidly = ISolidlyFactory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.Solidly, address(factorySolidly));
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(
+            IPriceGetter.Protocol.Solidly,
+            address(factorySolidly)
+        );
         if (token == params.wrappedNative.tokenAddress) {
             /// @dev Returning high total balance for wrappedNative to heavily weight value.
             return nativePrice;
@@ -85,16 +88,8 @@ contract PriceGetterSolidly is IPriceGetterExtension {
             uint256 totalSupply = ISolidlyPair(lp).totalSupply();
 
             // price0 * reserve0 + price1 * reserve1
-            uint256 token0Price = getTokenPrice(
-                token0,
-                factory,
-                params
-            );
-            uint256 token1Price = getTokenPrice(
-                token1,
-                factory,
-                params
-            );
+            uint256 token0Price = getTokenPrice(token0, factory, params);
+            uint256 token1Price = getTokenPrice(token1, factory, params);
             reserve0 = UtilityLibrary._normalizeToken(reserve0, token0);
             reserve1 = UtilityLibrary._normalizeToken(reserve1, token1);
             uint256 totalValue = (token0Price * uint256(reserve0)) + (token1Price * uint256(reserve1));
@@ -102,15 +97,11 @@ contract PriceGetterSolidly is IPriceGetterExtension {
             return totalValue / totalSupply;
         } catch {
             /// @dev If the pair is not a valid LP, return the price of the token
-            uint256 lpPrice = getTokenPrice(
-                lp,
-                factory,
-                params
-            );
+            uint256 lpPrice = getTokenPrice(lp, factory, params);
             return lpPrice;
         }
     }
-
+    
     // ========== NATIVE PRICE ==========
 
     function getNativePrice(

@@ -3,8 +3,11 @@ pragma solidity 0.8.16;
 
 import "./IPriceGetter.sol";
 import "./chainlink/ChainlinkOracle.sol";
-import "./extensions/IPriceGetterExtension.sol";
+import "./extensions/IPriceGetterProtocol.sol";
 import "./lib/UtilityLibrary.sol";
+
+import {Hypervisor} from "./interfaces/IGammaHypervisor.sol";
+import {IICHIVault} from "./interfaces/IICHIVault.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -32,11 +35,14 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         uint8 oracleDecimals;
     }
 
-    mapping(Protocol => IPriceGetterExtension) public protocolPriceGetter;
+    mapping(Protocol => IPriceGetterProtocol) public protocolPriceGetter;
     mapping(address => OracleInfo) public tokenOracles;
     TokenAndDecimals private wrappedNative;
     TokenAndDecimals[] public stableUsdTokens;
     uint256 public nativeLiquidityThreshold;
+
+    // Reserved storage space to allow for layout changes in the future.
+    uint256[50] private __gap;
 
     /**
      * @dev This contract constructor takes in several parameters which includes the wrapped native token address,
@@ -161,60 +167,24 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         nativeLiquidityThreshold = _nativeLiquidityThreshold;
     }
 
-    function setPriceGetterExtension(Protocol protocol, address extension) public onlyOwner {
-        protocolPriceGetter[protocol] = IPriceGetterExtension(extension);
+    function setPriceGetterProtocol(Protocol protocol, address extension) public onlyOwner {
+        protocolPriceGetter[protocol] = IPriceGetterProtocol(extension);
+    }
+
+    /**
+     * @dev Sets the price getter protocols for multiple protocols at once.
+     * @param protocols The protocols for which to set the price getter.
+     * @param extensions The addresses of the price getter extensions for each protocol.
+     */
+    function setPriceGetterProtocols(Protocol[] memory protocols, address[] memory extensions) public onlyOwner {
+        require(protocols.length == extensions.length, "Number of protocols must match number of extensions");
+        for (uint256 i; i < protocols.length; i++) {
+            setPriceGetterProtocol(protocols[i], extensions[i]);
+        }
     }
 
     /** GETTERS */
-
-    // ===== Get LP Prices =====
-
-    /**
-     * @dev Returns the prices of LP token from a specic protocol an factory.
-     * @param lp The address of the LP token
-     * @param protocol The protocol version to use
-     * @param factory The address of the factory used to calculate the price.
-     * @return price The current price of LP.
-     * @dev Protocol V3 and Algebra not yet supported in here because functions token 2 tokens instead of 1 and for V3 also a fee.
-     * Use the dedicated functions for these protocols
-     */
-    function getLPPrice(address lp, Protocol protocol, address factory) public view returns (uint256 price) {
-        IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
-            this,
-            wrappedNative,
-            stableUsdTokens,
-            nativeLiquidityThreshold
-        );
-        price = extension.getLPPrice(lp, factory, params);
-    }
-
-    // ===== Get Native Prices =====
-
-    /**
-     * @dev Returns the current price of wrappedNative in USD based on the given protocol.
-     * @param protocol The protocol version to use
-     * @param factory The address of the factory used to calculate the price.
-     * @return nativePrice The current price of wrappedNative in USD.
-     */
-    function getNativePrice(Protocol protocol, address factory) public view returns (uint256 nativePrice) {
-        /// @dev Short circuit if oracle price is found
-        uint256 oraclePrice = getOraclePriceNormalized(wrappedNative.tokenAddress);
-        if (oraclePrice > 0) {
-            return oraclePrice;
-        }
-
-        IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
-            this,
-            wrappedNative,
-            stableUsdTokens,
-            nativeLiquidityThreshold
-        );
-        nativePrice = extension.getNativePrice(factory, params);
-    }
-
-    // ===== Get Token Prices =====
+    // ========== Get Token Prices ==========
 
     /**
      * @dev Returns the current price of the given token based on the specified protocol and time interval.
@@ -231,14 +201,8 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
             return getNativePrice(protocol, factory);
         }
 
-        IPriceGetterExtension extension = getPriceGetterExtension(protocol);
-        IPriceGetterExtension.PriceGetterParams memory params = IPriceGetterExtension.PriceGetterParams(
-            this,
-            wrappedNative,
-            stableUsdTokens,
-            nativeLiquidityThreshold
-        );
-        tokenPrice = extension.getTokenPrice(token, factory, params);
+        IPriceGetterProtocol extension = getPriceGetterProtocol(protocol);
+        tokenPrice = extension.getTokenPrice(token, factory, getParams());
     }
 
     function getTokenPrices(
@@ -253,6 +217,108 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
             address token = tokens[i];
             tokenPrices[i] = getTokenPrice(token, protocol, factory);
         }
+    }
+
+    // ========== Get LP Prices ==========
+
+    /**
+     * @dev Returns the prices of LP token from a specic protocol an factory.
+     * @param lp The address of the LP token
+     * @param protocol The protocol version to use
+     * @param factory The address of the factory used to calculate the price.
+     * @return price The current price of LP.
+     * @dev Protocol V3 and Algebra not yet supported in here because functions token 2 tokens instead of 1 and for V3 also a fee.
+     * Use the dedicated functions for these protocols
+     */
+    function getLPPrice(address lp, Protocol protocol, address factory) public view returns (uint256 price) {
+        if (protocol == Protocol._Gamma || protocol == Protocol._Steer) {
+            revert("This protocol needs to use getWrappedLPPrice() instead");
+        }
+        IPriceGetterProtocol extension = getPriceGetterProtocol(protocol);
+        price = extension.getLPPrice(lp, factory, getParams());
+    }
+
+    function getLPPrices(
+        address[] calldata lps,
+        Protocol protocol,
+        address factory
+    ) public view returns (uint256[] memory prices) {
+        uint256 lpLength = lps.length;
+        prices = new uint256[](lpLength);
+
+        for (uint256 i; i < lpLength; i++) {
+            prices[i] = getLPPrice(lps[i], protocol, factory);
+        }
+    }
+
+    function getWrappedLPPrice(
+        address lp,
+        Protocol protocol,
+        address factory,
+        Wrappers wrapper
+    ) public view override returns (uint256 price) {
+        if (protocol != Protocol.UniV3 && protocol != Protocol.Algebra) {
+            revert("Protocol does not have wrappers");
+        }
+
+        if (protocol == Protocol._Gamma || protocol == Protocol._Steer) {
+            revert("You are confusing protocol and wrapper");
+        }
+
+        address token0;
+        address token1;
+        uint256 total0;
+        uint256 total1;
+
+        if (wrapper == IPriceGetter.Wrappers.Gamma) {
+            token0 = address(Hypervisor(lp).token0());
+            token1 = address(Hypervisor(lp).token1());
+        } else if (wrapper == IPriceGetter.Wrappers.Ichi) {
+            token0 = IICHIVault(lp).token0();
+            token1 = IICHIVault(lp).token1();
+        } else {
+            //As backup just try token0() and token1() which is default interface usually
+            token0 = address(Hypervisor(lp).token0());
+            token1 = address(Hypervisor(lp).token1());
+        }
+
+        uint256 priceToken0 = getTokenPrice(token0, protocol, factory);
+        uint256 priceToken1 = getTokenPrice(token1, protocol, factory);
+
+        if (wrapper == IPriceGetter.Wrappers.Gamma) {
+            (total0, total1) = Hypervisor(lp).getTotalAmounts();
+        } else if (wrapper == IPriceGetter.Wrappers.Ichi) {
+            (total0, total1) = IICHIVault(lp).getTotalAmounts();
+        } else {
+            //as backup just try gamma which is has pretty generic interface
+            (total0, total1) = Hypervisor(lp).getTotalAmounts();
+        }
+
+        price =
+            (priceToken0 *
+                UtilityLibrary._normalizeToken(total0, token0) +
+                priceToken1 *
+                UtilityLibrary._normalizeToken(total1, token1)) /
+            IERC20(lp).totalSupply();
+    }
+
+    // ========== Get Native Prices ==========
+
+    /**
+     * @dev Returns the current price of wrappedNative in USD based on the given protocol.
+     * @param protocol The protocol version to use
+     * @param factory The address of the factory used to calculate the price.
+     * @return nativePrice The current price of wrappedNative in USD.
+     */
+    function getNativePrice(Protocol protocol, address factory) public view returns (uint256 nativePrice) {
+        /// @dev Short circuit if oracle price is found
+        uint256 oraclePrice = getOraclePriceNormalized(wrappedNative.tokenAddress);
+        if (oraclePrice > 0) {
+            return oraclePrice;
+        }
+
+        IPriceGetterProtocol extension = getPriceGetterProtocol(protocol);
+        nativePrice = extension.getNativePrice(factory, getParams());
     }
 
     /**
@@ -271,7 +337,7 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         return 0;
     }
 
-    function getPriceGetterExtension(Protocol protocol) public view returns (IPriceGetterExtension extension) {
+    function getPriceGetterProtocol(Protocol protocol) public view returns (IPriceGetterProtocol extension) {
         extension = protocolPriceGetter[protocol];
         if (address(extension) == address(0)) {
             revert("Invalid extension");
@@ -279,4 +345,8 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
     }
 
     /** VIEW FUNCTIONS */
+
+    function getParams() public view returns (IPriceGetterProtocol.PriceGetterParams memory params) {
+        params = IPriceGetterProtocol.PriceGetterParams(this, wrappedNative, stableUsdTokens, nativeLiquidityThreshold);
+    }
 }

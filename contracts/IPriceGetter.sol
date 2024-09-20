@@ -5,13 +5,19 @@ interface IPriceGetter {
     enum Protocol {
         __,
         ___,
-        V2,
-        V3,
+        UniV2,
+        UniV3,
         Algebra,
-        Gamma,
-        Steer,
+        _Gamma, // outdated
+        _Steer, // outdated
         Solidly,
         XFAI
+    }
+
+    enum Wrappers {
+        Gamma,
+        Ichi,
+        Steer
     }
 
     struct TokenAndDecimals {
@@ -19,8 +25,14 @@ interface IPriceGetter {
         uint8 decimals;
     }
 
-    function getLPPrice(address lp, Protocol protocol, address factory) external view returns (uint256 price);
     function getTokenPrice(address token, Protocol protocol, address factory) external view returns (uint256 price);
+    function getLPPrice(address lp, Protocol protocol, address factory) external view returns (uint256 price);
+    function getWrappedLPPrice(
+        address lp,
+        Protocol protocol,
+        address factory,
+        IPriceGetter.Wrappers wrapper
+    ) external view returns (uint256 price);
     function getNativePrice(Protocol protocol, address factory) external view returns (uint256 nativePrice);
     function getOraclePriceNormalized(address token) external view returns (uint256 price);
 }

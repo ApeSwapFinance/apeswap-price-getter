@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterExtension.sol";
+import "./IPriceGetterProtocol.sol";
 import "../IPriceGetter.sol";
 import "../lib/UtilityLibrary.sol";
 import "../interfaces/IXfaiFactory.sol";
 import "../interfaces/IXfaiPool.sol";
 
 //THIS CONTRACT IS NOT CORRECT
-contract PriceGetterXfai is IPriceGetterExtension {
+contract PriceGetterXfai is IPriceGetterProtocol {
     // ========== Get Token Prices ==========
 
     mapping(uint256 => address) public XFIT;

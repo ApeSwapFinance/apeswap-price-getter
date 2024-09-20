@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterExtension.sol";
+import "./IPriceGetterProtocol.sol";
 import "../IPriceGetter.sol";
 import "../lib/UtilityLibrary.sol";
 import "../interfaces/IAlgebraPool.sol";
 import "../interfaces/IAlgebraFactory.sol";
 
-contract PriceGetterAlgebra is IPriceGetterExtension {
+contract PriceGetterAlgebra is IPriceGetterProtocol {
     // ========== Get Token Prices ==========
 
     function getTokenPrice(
@@ -25,9 +25,20 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
         uint256 totalPrice;
         uint256 totalBalance;
 
+        tempPrice = _getRelativePriceLP(factoryAlgebra, token, params.wrappedNative.tokenAddress);
+        if (tempPrice > 0) {
+            address pair = factoryAlgebra.poolByPair(token, params.wrappedNative.tokenAddress);
+            uint256 balance = IERC20(token).balanceOf(pair);
+            uint256 wNativeBalance = IERC20(params.wrappedNative.tokenAddress).balanceOf(pair);
+            if (wNativeBalance > params.nativeLiquidityThreshold) {
+                totalPrice += ((tempPrice * nativePrice) / 1e18) * balance;
+                totalBalance += balance;
+            }
+        }
+
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
-            tempPrice = _getLPPrice(address(factoryAlgebra), token, stableUsdToken);
+            tempPrice = _getRelativePriceLP(factoryAlgebra, token, stableUsdToken);
             if (tempPrice > 0) {
                 address pair = factoryAlgebra.poolByPair(token, stableUsdToken);
                 uint256 balance = IERC20(token).balanceOf(pair);
@@ -56,7 +67,10 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
         address factory,
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
-        return _getLPPrice(factory, lp, params.wrappedNative.tokenAddress);
+        IAlgebraFactory factoryAlgebra = IAlgebraFactory(factory);
+        address token0 = IAlgebraPool(lp).token0();
+        address token1 = IAlgebraPool(lp).token1();
+        return _getRelativePriceLP(factoryAlgebra, token0, token1);
     }
 
     // ========== NATIVE PRICE ==========
@@ -71,7 +85,7 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
 
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
-            price = _getLPPrice(address(factoryAlgebra), params.wrappedNative.tokenAddress, stableUsdToken);
+            price = _getRelativePriceLP(factoryAlgebra, params.wrappedNative.tokenAddress, stableUsdToken);
             uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
             if (stableUsdPrice > 0) {
                 price = (price * stableUsdPrice) / 1e18;
@@ -92,7 +106,11 @@ contract PriceGetterAlgebra is IPriceGetterExtension {
 
     // ========== INTERNAL FUNCTIONS ==========
 
-    function _getLPPrice(address factoryAlgebra, address token0, address token1) internal view returns (uint256 price) {
+    function _getRelativePriceLP(
+        IAlgebraFactory factoryAlgebra,
+        address token0,
+        address token1
+    ) internal view returns (uint256 price) {
         address tokenPegPair = IAlgebraFactory(factoryAlgebra).poolByPair(token0, token1);
         if (tokenPegPair == address(0)) return 0;
 

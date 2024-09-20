@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterExtension.sol";
+import "./IPriceGetterProtocol.sol";
 import "../IPriceGetter.sol";
 import "../lib/UtilityLibrary.sol";
 import "../interfaces/IApePair.sol";
 import "../interfaces/IApeFactory.sol";
 
-contract PriceGetterUniV2 is IPriceGetterExtension {
+contract PriceGetterUniV2 is IPriceGetterProtocol {
     struct LocalVarsV2Price {
         uint256 usdStableTotal;
         uint256 wrappedNativeReserve;
@@ -24,7 +24,7 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IApeFactory factoryV2 = IApeFactory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.V2, address(factoryV2));
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV2, address(factoryV2));
         if (token == params.wrappedNative.tokenAddress) {
             /// @dev Returning high total balance for wrappedNative to heavily weight value.
             return nativePrice;
@@ -53,15 +53,13 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
             );
             uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
 
-            if (vars.stableUsdReserve > 10e18) {
-                if (stableUsdPrice > 0) {
-                    /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
-                    vars.usdStableTotal += (vars.stableUsdReserve * stableUsdPrice) / 1e18;
-                } else {
-                    vars.usdStableTotal += vars.stableUsdReserve;
-                }
-                tokenTotal += vars.tokenReserve;
+            if (stableUsdPrice > 0) {
+                /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
+                vars.usdStableTotal += (vars.stableUsdReserve * stableUsdPrice) / 1e18;
+            } else {
+                vars.usdStableTotal += vars.stableUsdReserve;
             }
+            tokenTotal += vars.tokenReserve;
         }
 
         if (tokenTotal == 0) {
@@ -84,16 +82,8 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
             uint256 totalSupply = IApePair(lp).totalSupply();
 
             //price0*reserve0+price1*reserve1
-            uint256 token0Price = getTokenPrice(
-                token0,
-                factory,
-                params
-            );
-            uint256 token1Price = getTokenPrice(
-                token1,
-                factory,
-                params
-            );
+            uint256 token0Price = getTokenPrice(token0, factory, params);
+            uint256 token1Price = getTokenPrice(token1, factory, params);
             reserve0 = UtilityLibrary._normalizeToken112(reserve0, token0);
             reserve1 = UtilityLibrary._normalizeToken112(reserve1, token1);
             uint256 totalValue = (token0Price * uint256(reserve0)) + (token1Price * uint256(reserve1));
@@ -101,11 +91,7 @@ contract PriceGetterUniV2 is IPriceGetterExtension {
             return totalValue / totalSupply;
         } catch {
             /// @dev If the pair is not a valid LP, return the price of the token
-            uint256 lpPrice = getTokenPrice(
-                lp,
-                factory,
-                params
-            );
+            uint256 lpPrice = getTokenPrice(lp, factory, params);
             return lpPrice;
         }
     }

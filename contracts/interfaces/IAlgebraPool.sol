@@ -27,4 +27,7 @@ interface IAlgebraPool {
             uint8 communityFee,
             bool unlocked
         );
+
+    function token0() external view returns (address);
+    function token1() external view returns (address);
 }

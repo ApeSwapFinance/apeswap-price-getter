@@ -27,7 +27,7 @@ async function main() {
 
   const { implementationThroughProxy: PriceGetterExtended, implementation: PriceGetterExtended_Implementation } =
     await deployManager.deployUpgradeableContract<PriceGetter__factory>(
-      'PriceGetter',
+      'PriceGetterBackwardsCompatible',
       [wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles],
       {
         proxyAdminAddress: proxyAdminContract,
