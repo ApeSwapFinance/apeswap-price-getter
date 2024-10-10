@@ -107,7 +107,7 @@ function getNetworkConfig(network: any) {
       factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
       factorySolidly: '0x0000000000000000000000000000000000000000',
       factoryXFAI: '0x0000000000000000000000000000000000000000',
-      proxyAdminContract: '',
+      proxyAdminContract: '0x13d9Bb6623668e9bDdd8514F96E9fA707DC89C36',
       stableUsdTokens: [
         '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
         '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
