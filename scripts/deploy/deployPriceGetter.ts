@@ -34,15 +34,40 @@ async function main() {
       }
     )
 
-  const output = {
+  const output: { priceGetterExtended: string, priceGetterExtendedImplementation: string, contracts: Record<string, string>, config: any } = {
     priceGetterExtended: PriceGetterExtended.address,
     priceGetterExtendedImplementation: PriceGetterExtended_Implementation.address,
+    contracts: {},
     config: {
       wNative,
       stableUsdTokens,
       oracleTokens,
       oracles,
     },
+  }
+
+  const priceGetterProtocols = [
+    { name: 'PriceGetterUniV2', protocol: 2 },
+    { name: 'PriceGetterUniV3', protocol: 3 },
+    { name: 'PriceGetterAlgebra', protocol: 4 },
+    { name: 'PriceGetterSolidly', protocol: 7 }
+  ]
+
+  for (let i = 0; i < priceGetterProtocols.length; i++) {
+    const priceGetterProtocol = priceGetterProtocols[i]
+    const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocol.name)
+    const PriceGetterProtocol = await deployManager.deployContractFromFactory(
+      PriceGetterProtocolFactory,
+      [],
+      {
+        name: priceGetterProtocol.name,
+        estimateGas: false,
+      }
+    )
+    console.log(`${priceGetterProtocol.name} deployed at ${PriceGetterProtocol.address}`)
+    output.contracts[priceGetterProtocol.name] = PriceGetterProtocol.address
+
+    await PriceGetterExtended.setPriceGetterProtocol(priceGetterProtocol.protocol, PriceGetterProtocol.address)
   }
 
   console.dir(output, { depth: 5 })

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterProtocol.sol";
-import "../IPriceGetter.sol";
-import "../lib/UtilityLibrary.sol";
-import "../interfaces/IXfaiFactory.sol";
-import "../interfaces/IXfaiPool.sol";
+import "../IPriceGetterProtocol.sol";
+import "../../IPriceGetter.sol";
+import "../../lib/UtilityLibrary.sol";
+import "./interfaces/IXfaiFactory.sol";
+import "./interfaces/IXfaiPool.sol";
 
 //THIS CONTRACT IS NOT CORRECT
 contract PriceGetterXfai is IPriceGetterProtocol {
@@ -14,6 +14,7 @@ contract PriceGetterXfai is IPriceGetterProtocol {
     mapping(uint256 => address) public XFIT;
 
     constructor() {
+        XFIT[1] = 0x4aa41bC1649C9C3177eD16CaaA11482295fC7441;
         XFIT[59144] = 0x8C56017B172226fE024dEa197748FC1eaccC82B1;
     }
 

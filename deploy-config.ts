@@ -13,7 +13,7 @@ function getNetworkConfig(network: any) {
       factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
       factorySolidly: '0xAFD89d21BdB66d00817d4153E055830B1c2B3970',
       factoryXFAI: '0x0000000000000000000000000000000000000000',
-      proxyAdminContract: '',
+      proxyAdminContract: '0xBAfA7f5Ed99dbE60FF658e8a4eeC2d6D1F383597',
       stableUsdTokens: [
         '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
         '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',

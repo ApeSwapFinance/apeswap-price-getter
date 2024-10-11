@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.16;
 
-import "./IPriceGetterProtocol.sol";
-import "../IPriceGetter.sol";
-import "../lib/UtilityLibrary.sol";
-import "../interfaces/IAlgebraPool.sol";
-import "../interfaces/IAlgebraFactory.sol";
+import "../IPriceGetterProtocol.sol";
+import "../../IPriceGetter.sol";
+import "../../lib/UtilityLibrary.sol";
+import "./interfaces/IAlgebraPool.sol";
+import "./interfaces/IAlgebraFactory.sol";
 
 contract PriceGetterAlgebra is IPriceGetterProtocol {
     // ========== Get Token Prices ==========

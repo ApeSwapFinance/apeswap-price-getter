@@ -3,12 +3,12 @@ pragma solidity 0.8.16;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 
-import "../interfaces/ISolidlyFactory.sol";
-import "../interfaces/IApeFactory.sol";
-import "../interfaces/IAlgebraFactory.sol";
+import "../extensions/Solidly/interfaces/ISolidlyFactory.sol";
+import "../extensions/UniV2/interfaces/IApeFactory.sol";
+import "../extensions/Algebra/interfaces/IAlgebraFactory.sol";
 import "../interfaces/IGammaHypervisor.sol";
 import "../interfaces/ISteerVault.sol";
-import "../interfaces/IXfaiFactory.sol";
+import "../extensions/Xfai/interfaces/IXfaiFactory.sol";
 
 interface IPriceGetterV2 {
     enum Protocol {

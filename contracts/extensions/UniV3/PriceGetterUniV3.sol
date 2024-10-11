@@ -4,10 +4,11 @@ pragma solidity 0.8.16;
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
+import "./interfaces/IUniswapV3PoolStateSlot0.sol";
 
-import "./IPriceGetterProtocol.sol";
-import "../IPriceGetter.sol";
-import "../lib/UtilityLibrary.sol";
+import "../IPriceGetterProtocol.sol";
+import "../../IPriceGetter.sol";
+import "../../lib/UtilityLibrary.sol";
 
 contract PriceGetterUniV3 is IPriceGetterProtocol {
     // ========== Get Token Prices ==========
@@ -145,7 +146,7 @@ contract PriceGetterUniV3 is IPriceGetterProtocol {
         if (tokenPegPair == address(0)) return 0;
 
         uint256 sqrtPriceX96;
-        (sqrtPriceX96, , , , , , ) = IUniswapV3Pool(tokenPegPair).slot0();
+        (sqrtPriceX96, , , , , , ) = IUniswapV3PoolStateSlot0(tokenPegPair).slot0();
 
         uint256 token0Decimals = UtilityLibrary._getTokenDecimals(token0);
         uint256 token1Decimals = UtilityLibrary._getTokenDecimals(token1);

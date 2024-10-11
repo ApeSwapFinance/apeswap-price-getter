@@ -3,15 +3,18 @@ pragma solidity 0.8.16;
 
 import "./IPriceGetterV2.sol";
 import "../token-lib/IERC20.sol";
-import "../interfaces/IApePair.sol";
-import "../interfaces/IApeFactory.sol";
 import "../chainlink/ChainlinkOracle.sol";
-import "../interfaces/ISolidlyFactory.sol";
-import "../interfaces/IUniswapV3PoolStateSlot0.sol";
-import "../interfaces/IAlgebraPool.sol";
-import "../interfaces/IXfaiFactory.sol";
-import "../interfaces/IXfaiPool.sol";
 import "../lib/UtilityLibrary.sol";
+import "../extensions/UniV3/interfaces/IUniswapV3PoolStateSlot0.sol";
+import "../extensions/Solidly/interfaces/ISolidlyFactory.sol";
+import "../extensions/UniV2/interfaces/IApeFactory.sol";
+import "../extensions/UniV2/interfaces/IApePair.sol";
+import "../extensions/Algebra/interfaces/IAlgebraFactory.sol";
+import "../extensions/Algebra/interfaces/IAlgebraPool.sol";
+import "../interfaces/IGammaHypervisor.sol";
+import "../interfaces/ISteerVault.sol";
+import "../extensions/Xfai/interfaces/IXfaiFactory.sol";
+import "../extensions/Xfai/interfaces/IXfaiPool.sol";
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
