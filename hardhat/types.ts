@@ -22,6 +22,7 @@ export const NETWORKS = <const>[
   'hardhat',
   'telos',
   'telosTestnet',
+  'avalanche',
 ]
 // Create a type out of the network array
 export type Network = typeof NETWORKS[number]
