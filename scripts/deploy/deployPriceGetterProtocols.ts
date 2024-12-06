@@ -21,7 +21,8 @@ async function main() {
 
   console.log(wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles)
   if (!stableUsdTokens.length || !oracleTokens.length || !oracles.length) {
-    throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
+    console.log('Stable USD tokens, oracle tokens, or oracles not provided')
+    // throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
   }
 
   const output: { contracts: Record<string, string>, config: any } = {
@@ -34,7 +35,7 @@ async function main() {
     },
   }
 
-  const priceGetterProtocolNames = ['PriceGetterUniV2', 'PriceGetterUniV3', 'PriceGetterAlgebra', 'PriceGetterSolidly']
+  const priceGetterProtocolNames = ['PriceGetterUniV3']
   for (let i = 0; i < priceGetterProtocolNames.length; i++) {
     const priceGetterProtocolName = priceGetterProtocolNames[i]
     const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocolName)

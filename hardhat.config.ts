@@ -211,6 +211,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 8453,
     accounts: mainnetAccounts,
   },
+  blast: {
+    url: 'https://rpc.blast.io',
+    getExplorerUrl: (address: string) => `https://blastscan.io/address/${address}`,
+    chainId: 81457,
+    accounts: mainnetAccounts,
+  },
   telos: {
     url: getEnv('TELOS_RPC_URL') || 'https://mainnet.telos.net/evm',
     getExplorerUrl: (address: string) => `https://www.teloscan.io/address/${address}`,
@@ -303,6 +309,7 @@ const config: HardhatUserConfig = {
       lineaTestnet: getEnv('LINEASCAN_API_KEY'),
       lightlink: getEnv('LIGHTLINK_API_KEY'),
       base: getEnv('BASESCAN_API_KEY'),
+      blast: getEnv('BLASTSCAN_API_KEY'),
       iota: getEnv('IOTASCAN_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
@@ -321,6 +328,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://phoenix.lightlink.io/api',
           browserURL: 'https://phoenix.lightlink.io',
+        },
+      },
+      {
+        network: 'blast',
+        chainId: 81457,
+        urls: {
+          apiURL: 'https://api.blastscan.io/api',
+          browserURL: 'https://blastscan.io',
         },
       }
     ]
@@ -353,6 +368,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       telos: getEnv('TELOSSCAN_API_KEY'),
       telosTestnet: getEnv('TELOSSCAN_API_KEY_API_KEY'),
       base: getEnv('BASESCAN_API_KEY'),
+      blast: getEnv('BLASTSCAN_API_KEY'),
       iota: getEnv('IOTASCAN_API_KEY'),
       lightlink: getEnv('LIGHTLINK_API_KEY'),
     },
