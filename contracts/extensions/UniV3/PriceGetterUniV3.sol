@@ -19,7 +19,7 @@ contract PriceGetterUniV3 is IPriceGetterProtocol {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IUniswapV3Factory factoryUniV3 = IUniswapV3Factory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV2, address(factoryUniV3));
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV3, address(factoryUniV3));
         if (token == params.wrappedNative.tokenAddress) {
             return nativePrice;
         }

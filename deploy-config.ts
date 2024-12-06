@@ -230,6 +230,26 @@ function getNetworkConfig(network: any) {
         "0x591e79239a7d679378eC8c847e5038150364C78F",
       ],
     }
+  } else if (['blast'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x4300000000000000000000000000000000000004',
+      nativeLiquidityThreshold: "2000000000000000", //0.002
+      factoryV2: '', // Synthswap
+      factoryAlgebra: '', // Synthswap
+      factoryV3: '', //UniswapV3 
+      factorySolidly: '', //  Aerodrome
+      factoryXFAI: '', //
+      proxyAdminContract: '',
+      stableUsdTokens: [
+        '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34', //USDe
+        '0x4300000000000000000000000000000000000003', //UDSb
+        '0x76DA31D7C9CbEAE102aff34D3398bC450c8374c1' //MIM
+      ],
+      oracleTokens: [],
+      // https://docs.chain.link/data-feeds/price-feeds/addresses?network=bnb-chain
+      oracles: [],
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

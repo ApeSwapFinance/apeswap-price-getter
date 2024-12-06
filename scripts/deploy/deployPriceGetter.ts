@@ -22,7 +22,8 @@ async function main() {
 
   console.log(wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles)
   if (!stableUsdTokens.length || !oracleTokens.length || !oracles.length) {
-    throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
+    console.log('Stable USD tokens, oracle tokens, or oracles not provided')
+    //   throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
   }
 
   const { implementationThroughProxy: PriceGetterExtended, implementation: PriceGetterExtended_Implementation } =
