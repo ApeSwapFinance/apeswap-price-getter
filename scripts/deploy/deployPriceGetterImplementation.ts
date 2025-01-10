@@ -1,7 +1,7 @@
 import { ethers, network, upgrades } from 'hardhat'
 import getNetworkConfig from '../../deploy-config'
 import { DeployManager } from './DeployManager'
-import { PriceGetterBackwardsCompatible__factory } from '../../typechain-types'
+import { PriceGetter__factory } from '../../typechain-types'
 
 async function main() {
   const currentNetwork = network.name
@@ -12,7 +12,6 @@ async function main() {
     oracleTokens,
     oracles,
     proxyAdminContract,
-    priceGetter
   } = getNetworkConfig(currentNetwork)
 
   const accounts = await ethers.getSigners()
@@ -24,10 +23,16 @@ async function main() {
   console.log(wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles)
   if (!stableUsdTokens.length || !oracleTokens.length || !oracles.length) {
     console.log('Stable USD tokens, oracle tokens, or oracles not provided')
-    // throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
+    //   throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
   }
 
-  const output: { contracts: Record<string, string>, config: any } = {
+  const PriceGetterExtendedFactory = await ethers.getContractFactory('PriceGetterBackwardsCompatible')
+  const PriceGetterExtended = await deployManager.deployContractFromFactory(PriceGetterExtendedFactory, [], {
+    name: 'PriceGetterExtended',
+  })
+
+  const output: { priceGetterExtendedImplementation: string, contracts: Record<string, string>, config: any } = {
+    priceGetterExtendedImplementation: PriceGetterExtended.address,
     contracts: {},
     config: {
       wNative,
@@ -35,37 +40,6 @@ async function main() {
       oracleTokens,
       oracles,
     },
-  }
-
-  const priceGetterProtocols = [
-    // { name: 'PriceGetterUniV2', protocol: 2 },
-    // { name: 'PriceGetterUniV3', protocol: 3 },
-    // { name: 'PriceGetterAlgebra', protocol: 4 },
-    // { name: 'PriceGetterSolidly', protocol: 7 },
-    { name: 'PriceGetterXfai', protocol: 8 },
-    // { name: 'PriceGetterCurve', protocol: 9 },
-  ]
-
-  for (let i = 0; i < priceGetterProtocols.length; i++) {
-    const priceGetterProtocol = priceGetterProtocols[i]
-    const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocol.name)
-    const PriceGetterProtocol = await deployManager.deployContractFromFactory(
-      PriceGetterProtocolFactory,
-      [],
-      {
-        name: priceGetterProtocol.name,
-        estimateGas: false,
-      }
-    )
-    console.log(`${priceGetterProtocol.name} deployed at ${PriceGetterProtocol.address}`)
-    output.contracts[priceGetterProtocol.name] = PriceGetterProtocol.address
-
-
-    if (priceGetter) {
-      console.log('Deployer price getter found, updating price getter protocol. priceGetter:', priceGetter)
-      const PriceGetterExtended = await PriceGetterBackwardsCompatible__factory.connect(priceGetter, deployerAccount)
-      await PriceGetterExtended.setPriceGetterProtocol(priceGetterProtocol.protocol, PriceGetterProtocol.address)
-    }
   }
 
   console.dir(output, { depth: 5 })

@@ -84,6 +84,8 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getTokenPrice(token, protocol, factorySolidly);
         } else if (protocol == Protocol.XFAI) {
             return getTokenPrice(token, protocol, factoryXFAI);
+        } else if (protocol == Protocol.Curve) {
+            return getTokenPrice(token, protocol, factoryV2);
         } else {
             revert("Invalid");
         }
@@ -156,12 +158,16 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getLPPrice(lp, protocol, factorySolidly);
         } else if (protocol == Protocol.XFAI) {
             return getLPPrice(lp, protocol, factoryXFAI);
+        } else if (protocol == Protocol.Curve) {
+            return getLPPrice(lp, protocol, factoryV2);
         } else if (protocol == Protocol._Gamma) {
             //This does not make sense, it's just for backwards compatibility. Gamma was used for all Algebra wrappers
             return getWrappedLPPrice(lp, Protocol.Algebra, factoryAlgebra, Wrappers.Gamma);
         } else if (protocol == Protocol._Steer) {
             //This does not make sense, it's just for backwards compatibility. Steer was used for all UniV3 wrappers
             return getWrappedLPPrice(lp, Protocol.UniV3, factoryV3, Wrappers.Gamma);
+        } else if (protocol == Protocol.Curve) {
+            return getLPPrice(lp, protocol, factoryV2);
         } else {
             revert("Invalid");
         }
@@ -228,6 +234,8 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getNativePrice(protocol, factorySolidly);
         } else if (protocol == Protocol.XFAI) {
             return getNativePrice(protocol, factoryXFAI);
+        } else if (protocol == Protocol.Curve) {
+            return getNativePrice(protocol, factoryV2);
         } else {
             revert("Invalid");
         }

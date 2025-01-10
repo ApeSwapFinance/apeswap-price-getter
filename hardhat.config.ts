@@ -206,7 +206,7 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     accounts: mainnetAccounts,
   },
   base: {
-    url: 'https://base-pokt.nodies.app',
+    url: 'https://base.llamarpc.com',
     getExplorerUrl: (address: string) => `https://basescan.org/address/${address}`,
     chainId: 8453,
     accounts: mainnetAccounts,
@@ -314,6 +314,14 @@ const config: HardhatUserConfig = {
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
+      {
+        network: 'iota',
+        chainId: 8822,
+        urls: {
+          apiURL: 'https://explorer.evm.iota.org/api',
+          browserURL: 'https://explorer.evm.iota.org/',
+        },
+      },
       {
         network: "linea",
         chainId: 59144,

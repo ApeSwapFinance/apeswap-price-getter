@@ -201,6 +201,12 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
             return getNativePrice(protocol, factory);
         }
 
+        /// @dev Short circuit if oracle price is found
+        uint256 oraclePrice = getOraclePriceNormalized(token);
+        if (oraclePrice > 0) {
+            return oraclePrice;
+        }
+
         IPriceGetterProtocol extension = getPriceGetterProtocol(protocol);
         tokenPrice = extension.getTokenPrice(token, factory, getParams());
     }
