@@ -8,6 +8,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
       nativeLiquidityThreshold: "100000000000000000", //0.1
+      priceGetter: '0x424356909715afcE9D0263dda0B27f0BC6cc638d',
       factoryV2: '0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6',
       factoryV3: '0x7Bc382DdC5928964D7af60e7e2f6299A1eA6F48d',
       factoryAlgebra: '0x306F06C147f064A010530292A1EB6737c3e378e4',
@@ -38,13 +39,14 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
       nativeLiquidityThreshold: "100" + "000000000000000000",
+      priceGetter: '0xc5331AF02Cb72e5Df07c47f85C89ef9227418f01',
       // factoryV2: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32', // Polygon Quicskwap factory
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284', // Polygon ApeSwap V2 Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory: https://docs.uniswap.org/contracts/v3/reference/deployments
       factoryAlgebra: '0x411b0fAcC3489691f28ad58c47006AF5E3Ab3A28', // Algebra Factory
       factorySolidly: '0x0000000000000000000000000000000000000000',
       factoryXFAI: '0x0000000000000000000000000000000000000000',
-      proxyAdminContract: '',
+      proxyAdminContract: '0xfCd9303142c89F4E818fB1bcceda72D4524CC49d',
       stableUsdTokens: [
         '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC.e
@@ -72,6 +74,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '0xf63e25B5492A856189420724fe6f3573620966f3',
       factoryV2: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f', // UniSwap Factory
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984', // UniswapV3 Factory
       factoryAlgebra: '0x0000000000000000000000000000000000000000', // Algebra Factory
@@ -102,6 +105,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '0xf1e931A569d8B3Ff5cCd11d2F42422FCABA6DBa4',
       factoryV2: '0xCf083Be4164828f00cAE704EC15a36D711491284',
       factoryV3: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
       factoryAlgebra: '0x9C2ABD632771b433E5E7507BcaA41cA3b25D8544',
@@ -132,6 +136,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '0x4E4746b8Cfc7E57d824Dd91A80146F9C23C36d52',
       factoryV2: '0x9E4Fc4a5A0769ba74088856C229c4a1Db2Ea5A9e', //SpartaDex (only v2 I could find)
       factoryAlgebra: '0x622b2c98123D303ae067DB4925CD6282B3A08D0F',
       factoryV3: '0xF97a3a7187A7636F882463f6693aB82d5Be5baD4', //Nile exchange
@@ -162,6 +167,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x7EbeF2A4b1B09381Ec5B9dF8C5c6f2dBECA59c73',
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '',
       factoryV2: '0x0000000000000000000000000000000000000000', //
       factoryAlgebra: '0x0000000000000000000000000000000000000000',
       factoryV3: '0xEE6099234bbdC793a43676D98Eb6B589ca7112D7', // elektrik
@@ -185,6 +191,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x6e47f8d48a01b44DF3fFF35d258A10A3AEdC114c',
       nativeLiquidityThreshold: "55000000000000000000", //55
+      priceGetter: '',
       factoryV2: '0x349aaAc3a500014981CBA11b64C76c66a6c1e8D0', //MagicSea
       factoryAlgebra: '0x0000000000000000000000000000000000000000',
       factoryV3: '0x0000000000000000000000000000000000000000', // 
@@ -207,6 +214,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x4200000000000000000000000000000000000006',
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '',
       factoryV2: '0x4bd16d59A5E1E0DB903F724aa9d721a31d7D720D', // Synthswap
       factoryAlgebra: '0xa37359E63D1aa44C0ACb2a4605D3B45785C97eE3', // Synthswap
       factoryV3: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD', //UniswapV3 
@@ -235,6 +243,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x4300000000000000000000000000000000000004',
       nativeLiquidityThreshold: "2000000000000000", //0.002
+      priceGetter: '',
       factoryV2: '', // Synthswap
       factoryAlgebra: '', // Synthswap
       factoryV3: '', //UniswapV3 
@@ -255,6 +264,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '',
       nativeLiquidityThreshold: "",
+      priceGetter: '',
       factoryV2: '',
       factoryV3: '',
       factoryAlgebra: '',
