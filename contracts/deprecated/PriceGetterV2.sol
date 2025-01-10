@@ -1566,7 +1566,7 @@ contract PriceGetterV2 is IPriceGetterV2, ChainlinkOracle, Initializable, Ownabl
         uint8 decimalsA,
         uint8 decimalsB
     ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
-        try IXfaiPool(pair).getStates() returns (uint reserve0, uint reserve1, uint) {
+        try IXfaiPool(pair).getStates() returns (uint reserve0, uint reserve1) {
             return (UtilityLibrary._normalize(reserve0, decimalsA), UtilityLibrary._normalize(reserve1, decimalsB));
         } catch {
             return (0, 0);

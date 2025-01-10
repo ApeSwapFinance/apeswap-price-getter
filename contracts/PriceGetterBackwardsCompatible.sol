@@ -82,7 +82,7 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getTokenPrice(token, protocol, factoryAlgebra);
         } else if (protocol == Protocol.Solidly) {
             return getTokenPrice(token, protocol, factorySolidly);
-        } else if (protocol == Protocol.XFAI) {
+        } else if (protocol == Protocol.Xfai) {
             return getTokenPrice(token, protocol, factoryXFAI);
         } else if (protocol == Protocol.Curve) {
             return getTokenPrice(token, protocol, factoryV2);
@@ -156,7 +156,7 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getLPPrice(lp, protocol, factoryAlgebra);
         } else if (protocol == Protocol.Solidly) {
             return getLPPrice(lp, protocol, factorySolidly);
-        } else if (protocol == Protocol.XFAI) {
+        } else if (protocol == Protocol.Xfai) {
             return getLPPrice(lp, protocol, factoryXFAI);
         } else if (protocol == Protocol.Curve) {
             return getLPPrice(lp, protocol, factoryV2);
@@ -232,7 +232,7 @@ contract PriceGetterBackwardsCompatible is PriceGetter {
             return getNativePrice(protocol, factoryAlgebra);
         } else if (protocol == Protocol.Solidly) {
             return getNativePrice(protocol, factorySolidly);
-        } else if (protocol == Protocol.XFAI) {
+        } else if (protocol == Protocol.Xfai) {
             return getNativePrice(protocol, factoryXFAI);
         } else if (protocol == Protocol.Curve) {
             return getNativePrice(protocol, factoryV2);

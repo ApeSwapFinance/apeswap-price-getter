@@ -11,7 +11,7 @@ interface IPriceGetter {
         _Gamma, // outdated
         _Steer, // outdated
         Solidly,
-        XFAI,
+        Xfai,
         Curve
     }
 
