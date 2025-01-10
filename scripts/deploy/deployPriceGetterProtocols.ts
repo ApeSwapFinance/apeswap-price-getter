@@ -62,7 +62,7 @@ async function main() {
 
 
     if (priceGetter) {
-      console.log('Deployer price getter found, updating price getter protocol. priceGetter:', priceGetter)
+      console.log('Deployed price getter found, updating price getter protocol. priceGetter:', priceGetter)
       const PriceGetterExtended = await PriceGetterBackwardsCompatible__factory.connect(priceGetter, deployerAccount)
       await PriceGetterExtended.setPriceGetterProtocol(priceGetterProtocol.protocol, PriceGetterProtocol.address)
     }

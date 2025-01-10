@@ -1,25 +1,71 @@
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.16;
+
+/**
+ * @title Interface for XfaiPool contract
+ */
 interface IXfaiPool {
+    /**
+     * @notice Called once by the factory at time of deployment
+     * @param _token The ERC20 token address of the pool
+     * @param _xfaiFactory The xfai Factory of the pool
+     */
+    function initialize(address _token, address _xfaiFactory) external;
+
+    /**
+     * @notice Get the current Xfai Core contract address
+     * @dev Only the Xfai Core contract can modify the state of the pool
+     */
     function getXfaiCore() external view returns (address);
-    function poolToken() external view returns (address);
-    function initialize(address _token, address _dexfaiDaoBridge) external;
-    function getStates() external view returns (uint, uint, uint);
-    function update(uint _balance, uint _r, uint _w) external;
-    function mint(address _to, uint _amount) external;
-    function burn(address _to, uint _amount) external;
+
+    /**
+     * @notice Get the current reserve and weight of the pool
+     */
+    function getStates() external view returns (uint, uint);
+
+    /**
+     * @notice Updates the reserve and weight.
+     * @dev This function is linked. Only the latest Xfai Core contract can call it
+     * @param _newReserve The latest token balance of the pool
+     * @param _newWeight The latest xfETH balance of the pool
+     */
+    function update(uint _newReserve, uint _newWeight) external;
+
+    /**
+     * @notice transfer the pool's poolToken or xfETH
+     * @dev This function is linked. Only the latest Xfai Core contract can call it.
+     * @param _token The ERC20 token address
+     * @param _to The recipient of the tokens
+     * @param _value The amount of tokens
+     */
     function linkedTransfer(address _token, address _to, uint256 _value) external;
 
-    function totalSupply() external view returns (uint);
-    function transfer(address _recipient, uint _amount) external returns (bool);
-    function decimals() external view returns (uint8);
-    function balanceOf(address) external view returns (uint);
-    function transferFrom(address _sender, address _recipient, uint _amount) external returns (bool);
-    function approve(address _spender, uint _value) external returns (bool);
-    function allowance(address _owner, address _spender) external view returns (uint256);
-    function symbol() external view returns (string memory);
-    function name() external view returns (string memory);
+    /**
+     * @notice This function mints new ERC20 liquidity tokens
+     * @dev This function is linked. Only the latest Xfai Core contract can call it
+     * @param _to The recipient of the tokens
+     * @param _amount The amount of tokens
+     */
+    function mint(address _to, uint _amount) external;
 
-    event Sync(uint _reserve, uint _w);
-    event Transfer(address indexed from, address indexed to, uint amount);
-    event Approval(address indexed owner, address indexed spender, uint amount);
-    event Write(uint _r, uint _w, uint _blockTimestamp);
+    /**
+     * @notice This function burns existing ERC20 liquidity tokens
+     * @dev This function is linked. Only the latest Xfai Core contract can call it
+     * @param _to The recipient whose tokens get burned
+     * @param _amount The amount of tokens burned
+     */
+    function burn(address _to, uint _amount) external;
+
+    /**
+     * @notice The ERC20 token address of the pool's underlying token
+     * @dev Not to be confused with the liquidity token address
+     */
+    function poolToken() external view returns (address);
+
+    /**
+     * @notice Emitted when the reserve and weight are updated
+     * @param newReserve The new reserve amount
+     * @param newWeight The new weight amount
+     */
+    event Sync(uint newReserve, uint newWeight);
 }

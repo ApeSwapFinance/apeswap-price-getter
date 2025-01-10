@@ -229,6 +229,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 41,
     accounts: testnetAccounts,
   },
+  avalanche: {
+    url: 'https://endpoints.omniatech.io/v1/avax/mainnet/public',
+    getExplorerUrl: (address: string) => `https://snowtrace.io/address/${address}`,
+    chainId: 43114,
+    accounts: mainnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -311,6 +317,7 @@ const config: HardhatUserConfig = {
       base: getEnv('BASESCAN_API_KEY'),
       blast: getEnv('BLASTSCAN_API_KEY'),
       iota: getEnv('IOTASCAN_API_KEY'),
+      avalanche: getEnv('AVALANCHE_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -345,7 +352,15 @@ const config: HardhatUserConfig = {
           apiURL: 'https://api.blastscan.io/api',
           browserURL: 'https://blastscan.io',
         },
-      }
+      },
+      {
+        network: 'avalanche',
+        chainId: 43114,
+        urls: {
+          apiURL: 'https://api.snowscan.xyz/api',
+          browserURL: 'https://snowscan.xyz/',
+        },
+      },
     ]
   },
 }
@@ -379,6 +394,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       blast: getEnv('BLASTSCAN_API_KEY'),
       iota: getEnv('IOTASCAN_API_KEY'),
       lightlink: getEnv('LIGHTLINK_API_KEY'),
+      avalanche: getEnv('AVALANCHE_API_KEY'),
     },
   },
 }

@@ -24,37 +24,22 @@ contract PriceGetterXfai is IPriceGetterProtocol {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IXfaiFactory factoryXfai = IXfaiFactory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.XFAI, address(factoryXfai));
+        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.Xfai, address(factoryXfai));
         if (token == params.wrappedNative.tokenAddress) {
             return nativePrice;
         }
 
-        uint256 tempPrice;
-        uint256 totalPrice;
-        uint256 totalBalance;
+        (uint256 tokenReserve, uint256 wNativeReserve) = _getNormalizedReservesFromFactoryXfai_Decimals(
+            factoryXfai,
+            token,
+            UtilityLibrary._getTokenDecimals(token),
+            params.wrappedNative.decimals
+        );
 
-        for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
-            address stableUsdToken = params.stableUsdTokens[i].tokenAddress;
-            tempPrice = _getLPPrice(factoryXfai, token); //, stableUsdToken);
-            if (tempPrice > 0) {
-                address pair = factoryXfai.getPool(token);
-                uint256 balance = IERC20(token).balanceOf(pair);
-                uint256 balanceStable = IERC20(stableUsdToken).balanceOf(pair);
-                if (balanceStable > 10 * (10 ** IERC20(stableUsdToken).decimals())) {
-                    uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken);
-                    if (stableUsdPrice > 0) {
-                        tempPrice = (tempPrice * stableUsdPrice) / 1e18;
-                    }
-                    totalPrice += tempPrice * balance;
-                    totalBalance += balance;
-                }
-            }
-        }
+        uint256 wNativeTotal = (wNativeReserve * nativePrice) / 1e18;
+        uint256 tokenTotal = tokenReserve;
 
-        if (totalBalance == 0) {
-            return 0;
-        }
-        price = totalPrice / totalBalance;
+        price = (wNativeTotal * 1e18) / tokenTotal;
     }
 
     // ========== LP PRICE ==========
@@ -110,7 +95,7 @@ contract PriceGetterXfai is IPriceGetterProtocol {
 
         uint256 reserve0;
         uint256 reserve1;
-        (reserve0, reserve1, ) = IXfaiPool(tokenPegPair).getStates();
+        (reserve0, reserve1) = IXfaiPool(tokenPegPair).getStates();
 
         uint256 token0Decimals = UtilityLibrary._getTokenDecimals(token0);
         uint256 token1Decimals = UtilityLibrary._getTokenDecimals(token1);
@@ -123,6 +108,39 @@ contract PriceGetterXfai is IPriceGetterProtocol {
             price = (reserve1 * 10 ** token0Decimals) / reserve0;
         } else {
             price = (reserve0 * 10 ** token1Decimals) / reserve1;
+        }
+    }
+
+    /**
+     * @dev Get normalized reserves for a given token pair from the ApeSwap Factory contract, specifying decimals.
+     * @param factoryXfai The address of the Xfai factory.
+     * @param decimalsA The number of decimals for the first token in the pair.
+     * @param decimalsB The number of decimals for the second token in the pair.
+     * @return normalizedReserveA The normalized reserve of the first token in the pair.
+     * @return normalizedReserveB The normalized reserve of the second token in the pair.
+     */
+    function _getNormalizedReservesFromFactoryXfai_Decimals(
+        IXfaiFactory factoryXfai,
+        address tokenA,
+        uint8 decimalsA,
+        uint8 decimalsB
+    ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
+        address pairAddress = factoryXfai.getPool(tokenA);
+        if (pairAddress == address(0)) {
+            return (0, 0);
+        }
+        return _getNormalizedReservesFromXfaiPair_Decimals(pairAddress, decimalsA, decimalsB);
+    }
+
+    function _getNormalizedReservesFromXfaiPair_Decimals(
+        address pair,
+        uint8 decimalsA,
+        uint8 decimalsB
+    ) internal view returns (uint256 normalizedReserveA, uint256 normalizedReserveB) {
+        try IXfaiPool(pair).getStates() returns (uint reserve0, uint reserve1) {
+            return (UtilityLibrary._normalize(reserve0, decimalsA), UtilityLibrary._normalize(reserve1, decimalsB));
+        } catch {
+            return (0, 0);
         }
     }
 }
