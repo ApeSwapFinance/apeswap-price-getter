@@ -235,6 +235,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 43114,
     accounts: mainnetAccounts,
   },
+  singularityTestnet: {
+    url: getEnv('SINGULARITY_TESTNET_RPC_URL') || 'https://rpc-testnet.singularityfinance.ai',
+    getExplorerUrl: (address: string) => `https://explorer-testnet.singularityfinance.ai/address/${address}`,
+    chainId: 751,
+    accounts: testnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -318,6 +324,7 @@ const config: HardhatUserConfig = {
       blast: getEnv('BLASTSCAN_API_KEY'),
       iota: getEnv('IOTASCAN_API_KEY'),
       avalanche: getEnv('AVALANCHE_API_KEY'),
+      singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -361,9 +368,18 @@ const config: HardhatUserConfig = {
           browserURL: 'https://snowscan.xyz/',
         },
       },
+      {
+        network: 'singularityTestnet',
+        chainId: 751,
+        urls: {
+          apiURL: 'https://explorer-testnet.singularityfinance.ai/api',
+          browserURL: 'https://explorer-testnet.singularityfinance.ai/',
+        },
+      },
     ]
   },
 }
+
 
 const parseApiKey = (network: Network, key?: string): string | undefined => {
   return key || verificationConfig.etherscan.apiKey[network]
@@ -395,6 +411,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       iota: getEnv('IOTASCAN_API_KEY'),
       lightlink: getEnv('LIGHTLINK_API_KEY'),
       avalanche: getEnv('AVALANCHE_API_KEY'),
+      singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
     },
   },
 }

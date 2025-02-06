@@ -290,6 +290,22 @@ function getNetworkConfig(network: any) {
         "0x51D7180edA2260cc4F6e4EebB82FEF5c3c2B8300",
       ],
     }
+  } else if (['singularityTestnet'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x6dC404EFd04B880B0Ab5a26eF461b63A12E3888D',
+      nativeLiquidityThreshold: "1000000000000000000",
+      priceGetter: '',
+      factoryV2: '',
+      factoryV3: '',
+      factoryAlgebra: '',
+      factorySolidly: '',
+      factoryXFAI: '',
+      stableUsdTokens: ['0xD2ED81BE83B33218737Ca188EB9AC28b79C6A0F3', '0xAF721b744483525F426D54854b6d46C55d57B441'],
+      oracleTokens: [],
+      oracles: [],
+      proxyAdminContract: '0xE2EaDC50c2F3044065E2484B0287F1CA82fD92E1',
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {
