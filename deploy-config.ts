@@ -306,6 +306,22 @@ function getNetworkConfig(network: any) {
       oracles: [],
       proxyAdminContract: '0xE2EaDC50c2F3044065E2484B0287F1CA82fD92E1',
     }
+  } else if (['crossfi'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0xc537d12bd626b135b251cca43283eff69ec109c4',
+      nativeLiquidityThreshold: "50000000000000000000",
+      priceGetter: '',
+      factoryV2: '',
+      factoryV3: '',
+      factoryAlgebra: '',
+      factorySolidly: '',
+      factoryXFAI: '',
+      stableUsdTokens: ['0x38e88b1ed92065ed20241a257ef3713a131c9155', '0x7bbce15166bbc008ec1adf9b3d6bba0602fce7ba'],
+      oracleTokens: [],
+      oracles: [],
+      proxyAdminContract: '',
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

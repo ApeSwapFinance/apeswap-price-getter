@@ -24,6 +24,7 @@ export const NETWORKS = <const>[
   'telosTestnet',
   'avalanche',
   'singularityTestnet',
+  'crossfi',
 ]
 // Create a type out of the network array
 export type Network = typeof NETWORKS[number]

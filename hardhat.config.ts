@@ -241,6 +241,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 751,
     accounts: testnetAccounts,
   },
+  crossfi: {
+    url: getEnv('CROSSFI_RPC_URL') || 'https://rpc.mainnet.ms/',
+    getExplorerUrl: (address: string) => `https://xfiscan.com/address/${address}`,
+    chainId: 4158,
+    accounts: mainnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -325,6 +331,7 @@ const config: HardhatUserConfig = {
       iota: getEnv('IOTASCAN_API_KEY'),
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
+      crossfi: getEnv('XFISCAN_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -376,6 +383,14 @@ const config: HardhatUserConfig = {
           browserURL: 'https://explorer-testnet.singularityfinance.ai/',
         },
       },
+      {
+        network: 'crossfi',
+        chainId: 4158,
+        urls: {
+          apiURL: 'https://xfiscan.com/api/1.0/verify-contract',
+          browserURL: 'https://xfiscan.com/',
+        },
+      },
     ]
   },
 }
@@ -412,6 +427,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       lightlink: getEnv('LIGHTLINK_API_KEY'),
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
+      crossfi: getEnv('XFISCAN_API_KEY'),
     },
   },
 }
