@@ -214,7 +214,7 @@ function getNetworkConfig(network: any) {
     return {
       wNative: '0x4200000000000000000000000000000000000006',
       nativeLiquidityThreshold: "2000000000000000", //0.002
-      priceGetter: '',
+      priceGetter: '0xE29C74B4DD05A268B5FFaadeF4fdbAa1de6FDe84',
       factoryV2: '0x4bd16d59A5E1E0DB903F724aa9d721a31d7D720D', // Synthswap
       factoryAlgebra: '0xa37359E63D1aa44C0ACb2a4605D3B45785C97eE3', // Synthswap
       factoryV3: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD', //UniswapV3 

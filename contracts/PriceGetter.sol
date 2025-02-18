@@ -263,7 +263,7 @@ contract PriceGetter is IPriceGetter, ChainlinkOracle, Initializable, OwnableUpg
         address factory,
         Wrappers wrapper
     ) public view override returns (uint256 price) {
-        if (protocol != Protocol.UniV3 && protocol != Protocol.Algebra) {
+        if (protocol != Protocol.UniV3 && protocol != Protocol.Algebra && protocol != Protocol.AlgebraIntegral) {
             revert("Protocol does not have wrappers");
         }
 

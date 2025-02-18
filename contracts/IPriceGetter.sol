@@ -12,7 +12,8 @@ interface IPriceGetter {
         _Steer, // outdated
         Solidly,
         Xfai,
-        Curve
+        Curve,
+        AlgebraIntegral
     }
 
     enum Wrappers {
