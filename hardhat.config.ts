@@ -247,6 +247,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 4158,
     accounts: mainnetAccounts,
   },
+  sonic: {
+    url: getEnv('SONIC_RPC_URL') || 'https://sonic.drpc.org',
+    getExplorerUrl: (address: string) => `https://sonicscan.org/address/${address}`,
+    chainId: 146,
+    accounts: mainnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -332,6 +338,7 @@ const config: HardhatUserConfig = {
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
       crossfi: getEnv('XFISCAN_API_KEY'),
+      sonic: getEnv('SONIC_API_KEY')
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -391,6 +398,14 @@ const config: HardhatUserConfig = {
           browserURL: 'https://xfiscan.com/',
         },
       },
+      {
+        network: "sonic",
+        chainId: 146,
+        urls: {
+          apiURL: "https://api.sonicscan.org/api",
+          browserURL: "https://sonicscan.org"
+        }
+      },
     ]
   },
 }
@@ -428,6 +443,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
       crossfi: getEnv('XFISCAN_API_KEY'),
+      sonic: getEnv('SONIC_API_KEY')
     },
   },
 }

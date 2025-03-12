@@ -322,6 +322,32 @@ function getNetworkConfig(network: any) {
       oracles: [],
       proxyAdminContract: '',
     }
+  } else if (['sonic'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38',
+      nativeLiquidityThreshold: "50000000000000000000",
+      priceGetter: '',
+      factoryV2: '',
+      factoryV3: '',
+      factoryAlgebra: '',
+      factorySolidly: '',
+      factoryXFAI: '',
+      stableUsdTokens: [
+        '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', //usdc.e
+        '0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE', //scUSD
+        '0x6047828dc181963ba44974801FF68e538dA5eaF9', //usdt
+      ],
+      oracleTokens: [
+        "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38", //wSONIC
+        "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE", //scUSD
+      ],
+      oracles: [
+        "0xc76dFb89fF298145b417d221B2c747d84952e01d",
+        "0xACE5e348a341a740004304c2c228Af1A4581920F"
+      ],
+      proxyAdminContract: '',
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {
