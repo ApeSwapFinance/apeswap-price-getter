@@ -14,6 +14,12 @@ contract PriceGetterSolidly is IPriceGetterProtocol {
         uint256 wrappedNativeTotal;
         uint256 tokenReserve;
         uint256 stableUsdReserve;
+        uint256 tokenTotal;
+        uint256 nativePrice;
+        address wrappedNativePair;
+        uint256 wNativeBalance;
+        uint256 balanceStable;
+        uint256 stableUsdPrice;
     }
 
     // ========== Get Token Prices ==========
@@ -24,16 +30,15 @@ contract PriceGetterSolidly is IPriceGetterProtocol {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         ISolidlyFactory factorySolidly = ISolidlyFactory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(
+        LocalVarsSolidlyPrice memory vars;
+        vars.nativePrice = params.mainPriceGetter.getNativePrice(
             IPriceGetter.Protocol.Solidly,
             address(factorySolidly)
         );
         if (token == params.wrappedNative.tokenAddress) {
             /// @dev Returning high total balance for wrappedNative to heavily weight value.
-            return nativePrice;
+            return vars.nativePrice;
         }
-
-        LocalVarsSolidlyPrice memory vars;
 
         (vars.tokenReserve, vars.wrappedNativeReserve) = _getNormalizedReservesFromFactorySolidly_Decimals(
             factorySolidly,
@@ -42,8 +47,21 @@ contract PriceGetterSolidly is IPriceGetterProtocol {
             UtilityLibrary._getTokenDecimals(token),
             params.wrappedNative.decimals
         );
-        vars.wrappedNativeTotal = (vars.wrappedNativeReserve * nativePrice) / 1e18;
-        uint256 tokenTotal = vars.tokenReserve;
+        vars.tokenTotal = 0;
+        try factorySolidly.getPair(token, params.wrappedNative.tokenAddress, false) returns (address pair) {
+            vars.wrappedNativePair = pair;
+        } catch {
+            try factorySolidly.getPool(token, params.wrappedNative.tokenAddress, false) returns (address pair) {
+                vars.wrappedNativePair = pair;
+            } catch {}
+        }
+        if (vars.wrappedNativePair != address(0)) {
+            vars.wNativeBalance = IERC20(params.wrappedNative.tokenAddress).balanceOf(vars.wrappedNativePair);
+            if (vars.wNativeBalance > params.nativeLiquidityThreshold) {
+                vars.wrappedNativeTotal = (vars.wrappedNativeReserve * vars.nativePrice) / 1e18;
+                vars.tokenTotal = vars.tokenReserve;
+            }
+        }
 
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             IPriceGetter.TokenAndDecimals memory stableUsdToken = params.stableUsdTokens[i];
@@ -54,23 +72,33 @@ contract PriceGetterSolidly is IPriceGetterProtocol {
                 UtilityLibrary._getTokenDecimals(token),
                 stableUsdToken.decimals
             );
-            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
-
-            if (vars.stableUsdReserve > 10e18) {
-                if (stableUsdPrice > 0) {
-                    /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
-                    vars.usdStableTotal += (vars.stableUsdReserve * stableUsdPrice) / 1e18;
-                } else {
-                    vars.usdStableTotal += vars.stableUsdReserve;
+            address stablePair;
+            try factorySolidly.getPair(token, stableUsdToken.tokenAddress, false) returns (address pair) {
+                stablePair = pair;
+            } catch {
+                try factorySolidly.getPool(token, stableUsdToken.tokenAddress, false) returns (address pair) {
+                    stablePair = pair;
+                } catch {}
+            }
+            if (stablePair != address(0)) {
+                vars.balanceStable = IERC20(stableUsdToken.tokenAddress).balanceOf(stablePair);
+                if (vars.balanceStable > 10 * (10 ** stableUsdToken.decimals)) {
+                    vars.stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
+                    if (vars.stableUsdPrice > 0) {
+                        /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
+                        vars.usdStableTotal += (vars.stableUsdReserve * vars.stableUsdPrice) / 1e18;
+                    } else {
+                        vars.usdStableTotal += vars.stableUsdReserve;
+                    }
+                    vars.tokenTotal += vars.tokenReserve;
                 }
-                tokenTotal += vars.tokenReserve;
             }
         }
 
-        if (tokenTotal == 0) {
+        if (vars.tokenTotal == 0) {
             return 0;
         }
-        price = ((vars.usdStableTotal + vars.wrappedNativeTotal) * 1e18) / tokenTotal;
+        price = ((vars.usdStableTotal + vars.wrappedNativeTotal) * 1e18) / vars.tokenTotal;
     }
 
     // ========== LP PRICE ==========

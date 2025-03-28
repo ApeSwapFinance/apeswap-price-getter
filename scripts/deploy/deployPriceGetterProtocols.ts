@@ -38,13 +38,13 @@ async function main() {
   }
 
   const priceGetterProtocols = [
-    // { name: 'PriceGetterUniV2', protocol: 2 },
+    { name: 'PriceGetterUniV2', protocol: 2 },
     // { name: 'PriceGetterUniV3', protocol: 3 },
     // { name: 'PriceGetterAlgebra', protocol: 4 },
     // { name: 'PriceGetterSolidly', protocol: 7 },
-    // { name: 'PriceGetterXfai', protocol: 8 },
+    // { name: 'PriceGetterXfai', protocol: 8 }, 
     // { name: 'PriceGetterCurve', protocol: 9 },
-    { name: 'PriceGetterAlgebraV4', protocol: 10 },
+    // { name: 'PriceGetterAlgebraIntegral', protocol: 10 },
   ]
 
   for (let i = 0; i < priceGetterProtocols.length; i++) {

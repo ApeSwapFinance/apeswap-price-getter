@@ -7,7 +7,7 @@ import "../../lib/UtilityLibrary.sol";
 import "./interfaces/IAlgebraPool.sol";
 import "./interfaces/IAlgebraFactory.sol";
 
-contract PriceGetterAlgebraV4 is IPriceGetterProtocol {
+contract PriceGetterAlgebraIntegral is IPriceGetterProtocol {
     // ========== Get Token Prices ==========
 
     function getTokenPrice(

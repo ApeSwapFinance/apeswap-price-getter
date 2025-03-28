@@ -14,6 +14,12 @@ contract PriceGetterUniV2 is IPriceGetterProtocol {
         uint256 wrappedNativeTotal;
         uint256 tokenReserve;
         uint256 stableUsdReserve;
+        uint256 tokenTotal;
+        uint256 nativePrice;
+        address wrappedNativePair;
+        uint256 wNativeBalance;
+        uint256 balanceStable;
+        uint256 stableUsdPrice;
     }
 
     // ========== Get Token Prices ==========
@@ -24,13 +30,12 @@ contract PriceGetterUniV2 is IPriceGetterProtocol {
         PriceGetterParams memory params
     ) public view override returns (uint256 price) {
         IApeFactory factoryV2 = IApeFactory(factory);
-        uint256 nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV2, address(factoryV2));
+        LocalVarsV2Price memory vars;
+        vars.nativePrice = params.mainPriceGetter.getNativePrice(IPriceGetter.Protocol.UniV2, address(factoryV2));
         if (token == params.wrappedNative.tokenAddress) {
             /// @dev Returning high total balance for wrappedNative to heavily weight value.
-            return nativePrice;
+            return vars.nativePrice;
         }
-
-        LocalVarsV2Price memory vars;
 
         (vars.tokenReserve, vars.wrappedNativeReserve) = _getNormalizedReservesFromFactoryV2_Decimals(
             factoryV2,
@@ -39,8 +44,13 @@ contract PriceGetterUniV2 is IPriceGetterProtocol {
             UtilityLibrary._getTokenDecimals(token),
             params.wrappedNative.decimals
         );
-        vars.wrappedNativeTotal = (vars.wrappedNativeReserve * nativePrice) / 1e18;
-        uint256 tokenTotal = vars.tokenReserve;
+        vars.tokenTotal = 0;
+        vars.wrappedNativePair = factoryV2.getPair(token, params.wrappedNative.tokenAddress);
+        vars.wNativeBalance = IERC20(params.wrappedNative.tokenAddress).balanceOf(vars.wrappedNativePair);
+        if (vars.wNativeBalance > params.nativeLiquidityThreshold) {
+            vars.wrappedNativeTotal = (vars.wrappedNativeReserve * vars.nativePrice) / 1e18;
+            vars.tokenTotal = vars.tokenReserve;
+        }
 
         for (uint256 i = 0; i < params.stableUsdTokens.length; i++) {
             IPriceGetter.TokenAndDecimals memory stableUsdToken = params.stableUsdTokens[i];
@@ -51,21 +61,24 @@ contract PriceGetterUniV2 is IPriceGetterProtocol {
                 UtilityLibrary._getTokenDecimals(token),
                 stableUsdToken.decimals
             );
-            uint256 stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
-
-            if (stableUsdPrice > 0) {
-                /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
-                vars.usdStableTotal += (vars.stableUsdReserve * stableUsdPrice) / 1e18;
-            } else {
-                vars.usdStableTotal += vars.stableUsdReserve;
+            address stablePair = factoryV2.getPair(token, stableUsdToken.tokenAddress);
+            vars.balanceStable = IERC20(stableUsdToken.tokenAddress).balanceOf(stablePair);
+            if (vars.balanceStable > 10 * (10 ** stableUsdToken.decimals)) {
+                vars.stableUsdPrice = params.mainPriceGetter.getOraclePriceNormalized(stableUsdToken.tokenAddress);
+                if (vars.stableUsdPrice > 0) {
+                    /// @dev Weighting the USD side of the pair by the price of the USD stable token if it exists.
+                    vars.usdStableTotal += (vars.stableUsdReserve * vars.stableUsdPrice) / 1e18;
+                } else {
+                    vars.usdStableTotal += vars.stableUsdReserve;
+                }
+                vars.tokenTotal += vars.tokenReserve;
             }
-            tokenTotal += vars.tokenReserve;
         }
 
-        if (tokenTotal == 0) {
+        if (vars.tokenTotal == 0) {
             return 0;
         }
-        price = ((vars.usdStableTotal + vars.wrappedNativeTotal) * 1e18) / tokenTotal;
+        price = ((vars.usdStableTotal + vars.wrappedNativeTotal) * 1e18) / vars.tokenTotal;
     }
 
     // ========== LP PRICE ==========

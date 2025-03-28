@@ -348,6 +348,26 @@ function getNetworkConfig(network: any) {
       ],
       proxyAdminContract: '',
     }
+  } else if (['monadTestnet', 'monad-testnet', 'monadtestnet'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701',
+      nativeLiquidityThreshold: "0x0187D959A28B0D3B490c2D898fA1CcD054cCC3cd",
+      priceGetter: '',
+      factoryV2: '',
+      factoryV3: '',
+      factoryAlgebra: '',
+      factorySolidly: '',
+      factoryXFAI: '',
+      stableUsdTokens: [
+        '0xf817257fed379853cDe0fa4F97AB987181B1E5Ea', // USDC
+        '0x88b8E2161DEDC77EF4ab7585569D2415a1C1055D', // USDT
+        '0x5D876D73f4441D5f2438B1A3e2A51771B337F27A', // MONAD USDC ??
+      ],
+      oracleTokens: [],
+      oracles: [],
+      proxyAdminContract: '',
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

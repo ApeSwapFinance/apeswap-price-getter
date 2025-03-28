@@ -253,6 +253,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 146,
     accounts: mainnetAccounts,
   },
+  monadTestnet: {
+    url: getEnv('MONAD_TESTNET_RPC_URL') || 'https://monad-testnet.drpc.org',
+    getExplorerUrl: (address: string) => `https://testnet.monadexplorer.com/address/${address}`,
+    chainId: 10143,
+    accounts: testnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -275,6 +281,11 @@ function getSolcUserConfig(): SolcUserConfig[] {
           enabled: true,
           runs: 200,
         },
+      },
+      // * Uncomment this for monadTestnet. I don't know if this could negatively affect other networks.
+      metadata: {
+        bytecodeHash: 'none', // disable ipfs
+        useLiteralContent: true, // use source code
       },
     }
   })
@@ -316,7 +327,13 @@ const config: HardhatUserConfig = {
     // except: [':ERC20$'], // Array of String matchers used to exclude contracts
     // outputFile: './contract-size.md', // Optional output file to write to
   },
+  sourcify: getEnv('SOURCIFY_VERIFY') !== 'XXX' ? {
+    enabled: true,
+    apiUrl: 'https://sourcify-api-monad.blockvision.org',
+    browserUrl: 'https://testnet.monadexplorer.com',
+  } : { enabled: false },
   etherscan: {
+    enabled: false,
     /**
      * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
      *  This version breaks the src/task.ts file which hasn't been refactored yet
@@ -443,7 +460,8 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
       crossfi: getEnv('XFISCAN_API_KEY'),
-      sonic: getEnv('SONIC_API_KEY')
+      sonic: getEnv('SONIC_API_KEY'),
+      monadTestnet: getEnv('MONAD_TESTNET_API_KEY'),
     },
   },
 }
