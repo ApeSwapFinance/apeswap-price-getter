@@ -5,15 +5,8 @@ import { PriceGetterBackwardsCompatible__factory } from '../../typechain-types'
 
 async function main() {
   const currentNetwork = network.name
-  const {
-    wNative,
-    nativeLiquidityThreshold,
-    stableUsdTokens,
-    oracleTokens,
-    oracles,
-    proxyAdminContract,
-    priceGetter
-  } = getNetworkConfig(currentNetwork)
+  const { wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles, proxyAdminContract, priceGetter } =
+    getNetworkConfig(currentNetwork)
 
   const accounts = await ethers.getSigners()
   // Extract config for the network
@@ -27,7 +20,7 @@ async function main() {
     // throw new Error('Stable USD tokens, oracle tokens, and oracles must be provided')
   }
 
-  const output: { contracts: Record<string, string>, config: any } = {
+  const output: { contracts: Record<string, string>; config: any } = {
     contracts: {},
     config: {
       wNative,
@@ -42,7 +35,7 @@ async function main() {
     // { name: 'PriceGetterUniV3', protocol: 3 },
     // { name: 'PriceGetterAlgebra', protocol: 4 },
     // { name: 'PriceGetterSolidly', protocol: 7 },
-    // { name: 'PriceGetterXfai', protocol: 8 }, 
+    // { name: 'PriceGetterXfai', protocol: 8 },
     // { name: 'PriceGetterCurve', protocol: 9 },
     // { name: 'PriceGetterAlgebraIntegral', protocol: 10 },
   ]
@@ -50,17 +43,12 @@ async function main() {
   for (let i = 0; i < priceGetterProtocols.length; i++) {
     const priceGetterProtocol = priceGetterProtocols[i]
     const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocol.name)
-    const PriceGetterProtocol = await deployManager.deployContractFromFactory(
-      PriceGetterProtocolFactory,
-      [],
-      {
-        name: priceGetterProtocol.name,
-        estimateGas: false,
-      }
-    )
+    const PriceGetterProtocol = await deployManager.deployContractFromFactory(PriceGetterProtocolFactory, [], {
+      name: priceGetterProtocol.name,
+      estimateGas: false,
+    })
     console.log(`${priceGetterProtocol.name} deployed at ${PriceGetterProtocol.address}`)
     output.contracts[priceGetterProtocol.name] = PriceGetterProtocol.address
-
 
     if (priceGetter) {
       console.log('Deployed price getter found, updating price getter protocol. priceGetter:', priceGetter)

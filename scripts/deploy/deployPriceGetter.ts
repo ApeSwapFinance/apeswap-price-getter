@@ -5,14 +5,8 @@ import { PriceGetter__factory } from '../../typechain-types'
 
 async function main() {
   const currentNetwork = network.name
-  const {
-    wNative,
-    nativeLiquidityThreshold,
-    stableUsdTokens,
-    oracleTokens,
-    oracles,
-    proxyAdminContract,
-  } = getNetworkConfig(currentNetwork)
+  const { wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles, proxyAdminContract } =
+    getNetworkConfig(currentNetwork)
 
   const accounts = await ethers.getSigners()
   // Extract config for the network
@@ -35,7 +29,12 @@ async function main() {
       }
     )
 
-  const output: { priceGetterExtended: string, priceGetterExtendedImplementation: string, contracts: Record<string, string>, config: any } = {
+  const output: {
+    priceGetterExtended: string
+    priceGetterExtendedImplementation: string
+    contracts: Record<string, string>
+    config: any
+  } = {
     priceGetterExtended: PriceGetterExtended.address,
     priceGetterExtendedImplementation: PriceGetterExtended_Implementation.address,
     contracts: {},
@@ -51,24 +50,24 @@ async function main() {
     { name: 'PriceGetterUniV2', protocol: 2 },
     { name: 'PriceGetterUniV3', protocol: 3 },
     { name: 'PriceGetterAlgebra', protocol: 4 },
-    { name: 'PriceGetterSolidly', protocol: 7 }
+    { name: 'PriceGetterSolidly', protocol: 7 },
+    // { name: 'PriceGetterXfai', protocol: 8 },
+    // { name: 'PriceGetterCurve', protocol: 9 },
+    { name: 'PriceGetterAlgebraIntegral', protocol: 10 },
   ]
 
   for (let i = 0; i < priceGetterProtocols.length; i++) {
     const priceGetterProtocol = priceGetterProtocols[i]
     const PriceGetterProtocolFactory = await ethers.getContractFactory(priceGetterProtocol.name)
-    const PriceGetterProtocol = await deployManager.deployContractFromFactory(
-      PriceGetterProtocolFactory,
-      [],
-      {
-        name: priceGetterProtocol.name,
-        estimateGas: false,
-      }
-    )
+    const PriceGetterProtocol = await deployManager.deployContractFromFactory(PriceGetterProtocolFactory, [], {
+      name: priceGetterProtocol.name,
+      estimateGas: false,
+    })
     console.log(`${priceGetterProtocol.name} deployed at ${PriceGetterProtocol.address}`)
     output.contracts[priceGetterProtocol.name] = PriceGetterProtocol.address
-
+    delay(2000)
     await PriceGetterExtended.setPriceGetterProtocol(priceGetterProtocol.protocol, PriceGetterProtocol.address)
+    delay(2000)
   }
 
   console.dir(output, { depth: 5 })

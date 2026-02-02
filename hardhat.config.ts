@@ -110,16 +110,16 @@ const mainnetPrivateKey = getEnv('MAINNET_PRIVATE_KEY')
 const mainnetAccounts: HttpNetworkAccountsUserConfig | undefined = mainnetMnemonic
   ? { mnemonic: mainnetMnemonic }
   : mainnetPrivateKey
-    ? [mainnetPrivateKey] // Fallback to private key
-    : undefined
+  ? [mainnetPrivateKey] // Fallback to private key
+  : undefined
 
 const testnetMnemonic = getEnv('TESTNET_MNEMONIC')
 const testnetPrivateKey = getEnv('TESTNET_PRIVATE_KEY')
 const testnetAccounts: HttpNetworkAccountsUserConfig | undefined = testnetMnemonic
   ? { mnemonic: testnetMnemonic }
   : testnetPrivateKey
-    ? [testnetPrivateKey] // Fallback to private key
-    : undefined
+  ? [testnetPrivateKey] // Fallback to private key
+  : undefined
 
 type ExtendedNetworkOptions = {
   getExplorerUrl: (address: string) => string
@@ -259,6 +259,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 10143,
     accounts: testnetAccounts,
   },
+  hyperevm: {
+    url: getEnv('HYPEREVM_RPC_URL') || 'https://rpc.hyperliquid.xyz/evm',
+    getExplorerUrl: (address: string) => `https://hyperevmscan.io/address/${address}`,
+    chainId: 999,
+    accounts: mainnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -327,13 +333,16 @@ const config: HardhatUserConfig = {
     // except: [':ERC20$'], // Array of String matchers used to exclude contracts
     // outputFile: './contract-size.md', // Optional output file to write to
   },
-  sourcify: getEnv('SOURCIFY_VERIFY') !== 'XXX' ? {
-    enabled: true,
-    apiUrl: 'https://sourcify-api-monad.blockvision.org',
-    browserUrl: 'https://testnet.monadexplorer.com',
-  } : { enabled: false },
+  sourcify:
+    getEnv('SOURCIFY_VERIFY') !== 'XXX'
+      ? {
+          enabled: true,
+          apiUrl: 'https://sourcify-api-monad.blockvision.org',
+          browserUrl: 'https://testnet.monadexplorer.com',
+        }
+      : { enabled: false },
   etherscan: {
-    enabled: false,
+    enabled: true,
     /**
      * // NOTE This is valid in the latest version of "@nomiclabs/hardhat-etherscan.
      *  This version breaks the src/task.ts file which hasn't been refactored yet
@@ -355,10 +364,125 @@ const config: HardhatUserConfig = {
       avalanche: getEnv('AVALANCHE_API_KEY'),
       singularityTestnet: getEnv('SINGULARITYTESTNETSCAN_API_KEY'),
       crossfi: getEnv('XFISCAN_API_KEY'),
-      sonic: getEnv('SONIC_API_KEY')
+      sonic: getEnv('SONIC_API_KEY'),
+      hyperevm: getEnv('HYPEREVM_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
+      // Etherscan V2 API supported chains
+      {
+        network: 'mainnet',
+        chainId: 1,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=1',
+          browserURL: 'https://etherscan.io/',
+        },
+      },
+      {
+        network: 'sepolia',
+        chainId: 11155111,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=11155111',
+          browserURL: 'https://sepolia.etherscan.io/',
+        },
+      },
+      {
+        network: 'arbitrum',
+        chainId: 42161,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=42161',
+          browserURL: 'https://arbiscan.io/',
+        },
+      },
+      {
+        network: 'arbitrumGoerli',
+        chainId: 421613,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=421613',
+          browserURL: 'https://testnet.arbiscan.io/',
+        },
+      },
+      {
+        network: 'bsc',
+        chainId: 56,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=56',
+          browserURL: 'https://bscscan.com/',
+        },
+      },
+      {
+        network: 'bscTestnet',
+        chainId: 97,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=97',
+          browserURL: 'https://testnet.bscscan.com/',
+        },
+      },
+      {
+        network: 'polygon',
+        chainId: 137,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=137',
+          browserURL: 'https://polygonscan.com/',
+        },
+      },
+      {
+        network: 'polygonTestnet',
+        chainId: 80001,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=80001',
+          browserURL: 'https://mumbai.polygonscan.com/',
+        },
+      },
+      {
+        network: 'linea',
+        chainId: 59144,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=59144',
+          browserURL: 'https://lineascan.build/',
+        },
+      },
+      {
+        network: 'lineaTestnet',
+        chainId: 59140,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=59140',
+          browserURL: 'https://goerli.lineascan.build/',
+        },
+      },
+      {
+        network: 'base',
+        chainId: 8453,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=8453',
+          browserURL: 'https://basescan.org/',
+        },
+      },
+      {
+        network: 'avalanche',
+        chainId: 43114,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=43114',
+          browserURL: 'https://snowscan.xyz/',
+        },
+      },
+      {
+        network: 'blast',
+        chainId: 81457,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=81457',
+          browserURL: 'https://blastscan.io/',
+        },
+      },
+      {
+        network: 'hyperevm',
+        chainId: 999,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=999',
+          browserURL: 'https://hyperevmscan.io/',
+        },
+      },
+      // Custom API chains (not supported by Etherscan V2)
       {
         network: 'iota',
         chainId: 8822,
@@ -368,35 +492,11 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "linea",
-        chainId: 59144,
-        urls: {
-          apiURL: "https://api.lineascan.build/api",
-          browserURL: "https://lineascan.build/"
-        }
-      },
-      {
         network: 'lightlink',
         chainId: 1890,
         urls: {
           apiURL: 'https://phoenix.lightlink.io/api',
           browserURL: 'https://phoenix.lightlink.io',
-        },
-      },
-      {
-        network: 'blast',
-        chainId: 81457,
-        urls: {
-          apiURL: 'https://api.blastscan.io/api',
-          browserURL: 'https://blastscan.io',
-        },
-      },
-      {
-        network: 'avalanche',
-        chainId: 43114,
-        urls: {
-          apiURL: 'https://api.snowscan.xyz/api',
-          browserURL: 'https://snowscan.xyz/',
         },
       },
       {
@@ -416,17 +516,16 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "sonic",
+        network: 'sonic',
         chainId: 146,
         urls: {
-          apiURL: "https://api.sonicscan.org/api",
-          browserURL: "https://sonicscan.org"
-        }
+          apiURL: 'https://api.sonicscan.org/api',
+          browserURL: 'https://sonicscan.org',
+        },
       },
-    ]
+    ],
   },
 }
-
 
 const parseApiKey = (network: Network, key?: string): string | undefined => {
   return key || verificationConfig.etherscan.apiKey[network]
@@ -445,8 +544,8 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       arbitrum: getEnv('ARBITRUM_API_KEY'),
       arbitrumGoerli: getEnv('ARBITRUM_API_KEY'),
       bsc: getEnv('BSCSCAN_API_KEY'),
-      linea: getEnv("LINEASCAN_API_KEY"),
-      lineaTestnet: getEnv("LINEASCAN_API_KEY"),
+      linea: getEnv('LINEASCAN_API_KEY'),
+      lineaTestnet: getEnv('LINEASCAN_API_KEY'),
       bscTestnet: getEnv('BSCSCAN_API_KEY'),
       polygon: getEnv('POLYGONSCAN_API_KEY'),
       polygonTestnet: getEnv('POLYGONSCAN_API_KEY'),
@@ -462,6 +561,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       crossfi: getEnv('XFISCAN_API_KEY'),
       sonic: getEnv('SONIC_API_KEY'),
       monadTestnet: getEnv('MONAD_TESTNET_API_KEY'),
+      hyperevm: getEnv('HYPEREVM_API_KEY'),
     },
   },
 }
