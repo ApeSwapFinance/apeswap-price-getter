@@ -386,6 +386,22 @@ function getNetworkConfig(network: any) {
       ],
       proxyAdminContract: '',
     }
+  } else if (['robinhood'].includes(network)) {
+    console.log(`Deploying with ${network} config.`)
+    return {
+      wNative: '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73', // WETH
+      nativeLiquidityThreshold: '2000000000000000', //0.002
+      priceGetter: '',
+      factoryV2: '',
+      factoryV3: '',
+      factoryAlgebra: '',
+      factorySolidly: '',
+      factoryXFAI: '',
+      stableUsdTokens: [],
+      oracleTokens: [],
+      oracles: [],
+      proxyAdminContract: '0x36bA979866206Fc804597cA273A78EC9f913c732',
+    }
   } else if (['telos'].includes(network)) {
     console.log(`Deploying with ${network} config.`)
     return {

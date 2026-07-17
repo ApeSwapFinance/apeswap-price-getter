@@ -5,14 +5,8 @@ import { PriceGetter__factory } from '../../typechain-types'
 
 async function main() {
   const currentNetwork = network.name
-  const {
-    wNative,
-    nativeLiquidityThreshold,
-    stableUsdTokens,
-    oracleTokens,
-    oracles,
-    proxyAdminContract,
-  } = getNetworkConfig(currentNetwork)
+  const { wNative, nativeLiquidityThreshold, stableUsdTokens, oracleTokens, oracles, proxyAdminContract } =
+    getNetworkConfig(currentNetwork)
 
   const accounts = await ethers.getSigners()
   // Extract config for the network
@@ -28,10 +22,10 @@ async function main() {
 
   const PriceGetterExtendedFactory = await ethers.getContractFactory('PriceGetterBackwardsCompatible')
   const PriceGetterExtended = await deployManager.deployContractFromFactory(PriceGetterExtendedFactory, [], {
-    name: 'PriceGetterExtended',
+    name: 'PriceGetterBackwardsCompatible',
   })
 
-  const output: { priceGetterExtendedImplementation: string, contracts: Record<string, string>, config: any } = {
+  const output: { priceGetterExtendedImplementation: string; contracts: Record<string, string>; config: any } = {
     priceGetterExtendedImplementation: PriceGetterExtended.address,
     contracts: {},
     config: {

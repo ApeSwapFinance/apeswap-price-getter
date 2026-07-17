@@ -265,6 +265,12 @@ const networkConfig: ExtendedHardhatNetworkConfig = {
     chainId: 999,
     accounts: mainnetAccounts,
   },
+  robinhood: {
+    url: getEnv('ROBINHOOD_RPC_URL') || 'https://rpc.mainnet.chain.robinhood.com',
+    getExplorerUrl: (address: string) => `https://robinhoodchain.blockscout.com/address/${address}`,
+    chainId: 4663,
+    accounts: mainnetAccounts,
+  },
   // Placeholder for the configuration below.
   hardhat: {
     getExplorerUrl: (address: string) => `(NO DEV EXPLORER): ${address}`,
@@ -366,6 +372,7 @@ const config: HardhatUserConfig = {
       crossfi: getEnv('XFISCAN_API_KEY'),
       sonic: getEnv('SONIC_API_KEY'),
       hyperevm: getEnv('HYPEREVM_API_KEY'),
+      robinhood: getEnv('ROBINHOOD_API_KEY'),
     },
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify#adding-support-for-other-networks
     customChains: [
@@ -523,6 +530,14 @@ const config: HardhatUserConfig = {
           browserURL: 'https://sonicscan.org',
         },
       },
+      {
+        network: 'robinhood',
+        chainId: 4663,
+        urls: {
+          apiURL: 'https://robinhoodchain.blockscout.com/api',
+          browserURL: 'https://robinhoodchain.blockscout.com',
+        },
+      },
     ],
   },
 }
@@ -562,6 +577,7 @@ const verificationConfig: { etherscan: { apiKey: Record<Network, string> } } = {
       sonic: getEnv('SONIC_API_KEY'),
       monadTestnet: getEnv('MONAD_TESTNET_API_KEY'),
       hyperevm: getEnv('HYPEREVM_API_KEY'),
+      robinhood: getEnv('ROBINHOOD_API_KEY'),
     },
   },
 }
